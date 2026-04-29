@@ -29,7 +29,6 @@
       flex-direction: column;
     }
 
-    /* ── Header ── */
     header {
       text-align: center;
       padding: 3.5rem 1rem 2.5rem;
@@ -45,12 +44,9 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    header p {
-      color: var(--muted);
-      font-size: .95rem;
-    }
+    header p { color: var(--muted); font-size: .95rem; }
 
-    /* ── Status banner ── */
+    /* Status bar */
     #status-bar {
       display: none;
       align-items: center;
@@ -86,11 +82,8 @@
     }
     #end-btn:hover { background: rgba(239,68,68,.12); }
 
-    /* ── Grid ── */
-    main {
-      flex: 1;
-      padding: 0 1.5rem 4rem;
-    }
+    main { flex: 1; padding: 0 1.5rem 4rem; }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -98,15 +91,17 @@
       max-width: 1100px;
       margin: 0 auto;
     }
-    @media (max-width: 700px) {
-      .grid { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
 
-    /* ── Agent column ── */
-    .agent-col {
+    /* Agent column */
+    .agent-col { display: flex; flex-direction: column; gap: .75rem; }
+
+    /* Label row: name + refresh button */
+    .agent-label-row {
       display: flex;
-      flex-direction: column;
-      gap: .75rem;
+      align-items: center;
+      gap: .5rem;
+      padding-left: .25rem;
     }
     .agent-label {
       font-size: .8rem;
@@ -114,10 +109,10 @@
       letter-spacing: .1em;
       text-transform: uppercase;
       color: var(--muted);
-      padding-left: .25rem;
       display: flex;
       align-items: center;
       gap: .5rem;
+      flex: 1;
       transition: color .3s;
     }
     .agent-col.active .agent-label { color: var(--accent2); }
@@ -130,19 +125,40 @@
     }
     .agent-col.active .live-dot { display: block; }
 
-    /* ── Widget card ── */
+    /* Refresh button */
+    .refresh-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      width: 26px; height: 26px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      font-size: .85rem;
+      line-height: 1;
+      transition: border-color .2s, color .2s, transform .3s;
+      flex-shrink: 0;
+    }
+    .refresh-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+    .refresh-btn.spinning { animation: spin .5s linear; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Widget card */
     .widget-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 16px;
       overflow: hidden;
       position: relative;
-      transition: border-color .35s, box-shadow .35s;
       aspect-ratio: 9 / 14;
+      transition: border-color .35s, box-shadow .35s;
+      /* Intercept first click to lock before widget fires */
+      cursor: pointer;
     }
     .agent-col.active .widget-card {
       border-color: var(--border-active);
       box-shadow: 0 0 0 1px var(--border-active), 0 12px 40px rgba(124,92,252,.2);
+      cursor: default;
     }
 
     .widget-card iframe {
@@ -150,14 +166,28 @@
       width: 100%;
       height: 100%;
       border: none;
+      /* Block pointer events until this agent is selected */
+      pointer-events: none;
     }
+    /* Allow interaction only on active agent */
+    .agent-col.active .widget-card iframe { pointer-events: auto; }
 
-    /* ── Lock overlay ── */
+    /* Click interceptor: transparent layer on top of inactive iframes */
+    .click-interceptor {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      cursor: pointer;
+    }
+    /* Remove interceptor when active */
+    .agent-col.active .click-interceptor { display: none; }
+
+    /* Lock overlay (shown when another agent is active) */
     .lock-overlay {
       display: none;
       position: absolute;
       inset: 0;
-      background: rgba(8,8,16,.8);
+      background: rgba(8,8,16,.82);
       backdrop-filter: blur(6px);
       -webkit-backdrop-filter: blur(6px);
       z-index: 10;
@@ -166,10 +196,9 @@
       flex-direction: column;
       gap: .75rem;
       border-radius: 16px;
-      cursor: not-allowed;
     }
     .lock-overlay.visible { display: flex; }
-    .lock-icon { font-size: 1.8rem; opacity: .45; }
+    .lock-icon { font-size: 1.8rem; opacity: .4; }
     .lock-overlay p {
       font-size: .78rem;
       color: var(--muted);
@@ -200,7 +229,6 @@
     <span>Sesión activa con <strong id="active-name"></strong></span>
     <button id="end-btn" onclick="endSession()">Terminar sesión</button>
   </div>
-
   <div class="grid" id="grid"></div>
 </main>
 
@@ -215,21 +243,34 @@
 
   let activeId = null;
 
-  // Build grid with iframes pointing to agent.html?agent_id=...
   const grid = document.getElementById('grid');
   grid.innerHTML = agents.map(a => `
     <div class="agent-col" id="col-${a.id}">
-      <div class="agent-label">
-        ${a.name}
-        <span class="live-dot"></span>
+      <div class="agent-label-row">
+        <div class="agent-label">
+          ${a.name}
+          <span class="live-dot"></span>
+        </div>
+        <button
+          class="refresh-btn"
+          title="Reiniciar agente"
+          onclick="reloadAgent('${a.id}')"
+        >↺</button>
       </div>
-      <div class="widget-card">
+      <div class="widget-card" id="card-${a.id}">
         <iframe
           id="frame-${a.id}"
           src="agent.html?agent_id=${a.agentId}"
           allow="microphone; autoplay"
           allowfullscreen
         ></iframe>
+        <!-- Transparent layer: captures first click to lock others, then lets go -->
+        <div
+          class="click-interceptor"
+          id="interceptor-${a.id}"
+          onclick="handleFirstClick('${a.id}')"
+        ></div>
+        <!-- Lock overlay: shown when a different agent is active -->
         <div class="lock-overlay" id="lock-${a.id}">
           <div class="lock-icon">🔒</div>
           <p>Sesión en curso con <strong id="lock-name-${a.id}"></strong></p>
@@ -238,22 +279,30 @@
     </div>
   `).join('');
 
-  // Listen for postMessage events from iframes
+  // First click on an inactive card: lock others, then pass click through
+  function handleFirstClick(id) {
+    if (activeId !== null) return; // another is active, interceptor already hidden
+    setActive(id);
+    // Remove the interceptor so next clicks reach the iframe directly
+    const interceptor = document.getElementById('interceptor-' + id);
+    interceptor.style.display = 'none';
+  }
+
+  // postMessage from iframes (call-started / call-ended)
   window.addEventListener('message', (e) => {
     if (e.data?.type === 'call-started') {
-      // Find which iframe sent the message
-      const frame = agents.find(a => {
+      const match = agents.find(a => {
         const f = document.getElementById('frame-' + a.id);
         return f && f.contentWindow === e.source;
       });
-      if (frame) setActive(frame.id);
+      if (match) setActive(match.id);
     }
     if (e.data?.type === 'call-ended') {
-      const frame = agents.find(a => {
+      const match = agents.find(a => {
         const f = document.getElementById('frame-' + a.id);
         return f && f.contentWindow === e.source;
       });
-      if (frame && activeId === frame.id) endSession();
+      if (match && activeId === match.id) endSession();
     }
   });
 
@@ -284,7 +333,31 @@
     agents.forEach(a => {
       document.getElementById('col-' + a.id).classList.remove('active');
       document.getElementById('lock-' + a.id).classList.remove('visible');
+      // Restore interceptor so next click is captured again
+      const interceptor = document.getElementById('interceptor-' + a.id);
+      if (interceptor) interceptor.style.display = '';
     });
+  }
+
+  function reloadAgent(id) {
+    // If this agent is active, end session first
+    if (activeId === id) endSession();
+
+    const btn = document.querySelector(`#col-${id} .refresh-btn`);
+    btn.classList.add('spinning');
+    setTimeout(() => btn.classList.remove('spinning'), 500);
+
+    const frame = document.getElementById('frame-' + id);
+    const agent = agents.find(a => a.id === id);
+    // Force reload by clearing src then restoring
+    frame.src = '';
+    setTimeout(() => {
+      frame.src = `agent.html?agent_id=${agent.agentId}&t=${Date.now()}`;
+    }, 100);
+
+    // Restore interceptor
+    const interceptor = document.getElementById('interceptor-' + id);
+    if (interceptor) interceptor.style.display = '';
   }
 </script>
 </body>
