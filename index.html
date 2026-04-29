@@ -3,62 +3,91 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Voice Agents — Demo</title>
+  <title>Voice Agents — Arreglatech</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #080810;
-      --surface: #0f0f1a;
-      --border: #1e1e30;
-      --border-active: #7c5cfc;
-      --accent: #7c5cfc;
-      --accent2: #a78bfa;
-      --text: #e8e8f0;
-      --muted: #52526e;
-      --success: #22c55e;
-      --danger: #ef4444;
+      --bg: #f5f5f7;
+      --surface: #ffffff;
+      --surface2: #fafafa;
+      --border: #e4e4e9;
+      --border-active: #6b4efa;
+      --accent: #6b4efa;
+      --accent2: #8b6ef8;
+      --text: #1a1a2e;
+      --muted: #8e8ea8;
+      --success: #16a34a;
+      --danger: #dc2626;
     }
 
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
 
+    /* ── Header ── */
     header {
       text-align: center;
-      padding: 3.5rem 1rem 2.5rem;
+      padding: 4rem 1rem 2.5rem;
+    }
+    .logo-mark {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1.4rem;
+    }
+    .logo-mark span {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
     }
     header h1 {
-      font-size: clamp(2.8rem, 8vw, 5rem);
-      font-weight: 800;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 700;
       letter-spacing: -.03em;
-      line-height: 1;
+      color: var(--text);
+      line-height: 1.1;
       margin-bottom: .6rem;
-      background: linear-gradient(180deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,.04) 100%);
+    }
+    header h1 em {
+      font-style: normal;
+      background: linear-gradient(135deg, var(--accent) 0%, #c084fc 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    header p { color: var(--muted); font-size: .95rem; }
+    header p {
+      color: var(--muted);
+      font-size: .95rem;
+      font-weight: 400;
+    }
 
-    /* Status bar */
+    /* ── Status bar ── */
     #status-bar {
       display: none;
       align-items: center;
       gap: .6rem;
-      max-width: 720px;
-      margin: 0 auto 1.5rem;
-      background: rgba(124,92,252,.1);
-      border: 1px solid rgba(124,92,252,.25);
-      border-radius: 10px;
-      padding: .6rem 1.2rem;
-      font-size: .88rem;
-      color: var(--accent2);
+      max-width: 680px;
+      margin: 1.2rem auto 0;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: .65rem 1.2rem;
+      font-size: .85rem;
+      color: var(--text);
+      box-shadow: 0 1px 6px rgba(0,0,0,.06);
     }
     #status-bar.visible { display: flex; }
     .dot {
@@ -68,54 +97,56 @@
       animation: pulse 1.4s infinite;
       flex-shrink: 0;
     }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.25} }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
     #end-btn {
       margin-left: auto;
       background: none;
-      border: 1px solid rgba(239,68,68,.5);
+      border: 1px solid #fca5a5;
       color: var(--danger);
-      border-radius: 6px;
-      padding: .2rem .7rem;
+      border-radius: 7px;
+      padding: .22rem .75rem;
       cursor: pointer;
-      font-size: .8rem;
+      font-size: .78rem;
+      font-weight: 500;
+      font-family: inherit;
       transition: background .2s;
     }
-    #end-btn:hover { background: rgba(239,68,68,.12); }
+    #end-btn:hover { background: #fef2f2; }
 
-    main { flex: 1; padding: 0 1.5rem 4rem; }
+    /* ── Main ── */
+    main { flex: 1; padding: 2rem 1.5rem 5rem; }
 
     .grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 1.25rem;
-      max-width: 1100px;
+      gap: 1.5rem;
+      max-width: 1080px;
       margin: 0 auto;
     }
     @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
 
-    /* Agent column */
-    .agent-col { display: flex; flex-direction: column; gap: .75rem; }
+    /* ── Agent column ── */
+    .agent-col { display: flex; flex-direction: column; gap: .8rem; }
 
-    /* Label row: name + refresh button */
     .agent-label-row {
       display: flex;
       align-items: center;
       gap: .5rem;
-      padding-left: .25rem;
+      padding: 0 .1rem;
     }
     .agent-label {
-      font-size: .8rem;
-      font-weight: 700;
-      letter-spacing: .1em;
+      font-size: .78rem;
+      font-weight: 600;
+      letter-spacing: .09em;
       text-transform: uppercase;
       color: var(--muted);
       display: flex;
       align-items: center;
-      gap: .5rem;
+      gap: .45rem;
       flex: 1;
       transition: color .3s;
     }
-    .agent-col.active .agent-label { color: var(--accent2); }
+    .agent-col.active .agent-label { color: var(--accent); }
     .live-dot {
       display: none;
       width: 6px; height: 6px;
@@ -130,35 +161,39 @@
       background: none;
       border: 1px solid var(--border);
       color: var(--muted);
-      border-radius: 6px;
+      border-radius: 7px;
       width: 26px; height: 26px;
       display: flex; align-items: center; justify-content: center;
       cursor: pointer;
-      font-size: .85rem;
-      line-height: 1;
-      transition: border-color .2s, color .2s, transform .3s;
+      font-size: .9rem;
+      transition: border-color .2s, color .2s, background .2s;
       flex-shrink: 0;
     }
-    .refresh-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+    .refresh-btn:hover { border-color: var(--accent); color: var(--accent); background: #f0ebff; }
     .refresh-btn.spinning { animation: spin .5s linear; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Widget card */
+    /* ── Widget card ── */
     .widget-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 18px;
       overflow: hidden;
       position: relative;
       aspect-ratio: 9 / 14;
       transition: border-color .35s, box-shadow .35s;
-      /* Intercept first click to lock before widget fires */
       cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
     }
     .agent-col.active .widget-card {
       border-color: var(--border-active);
-      box-shadow: 0 0 0 1px var(--border-active), 0 12px 40px rgba(124,92,252,.2);
+      box-shadow: 0 0 0 1px var(--border-active),
+                  0 8px 32px rgba(107,78,250,.15),
+                  0 1px 3px rgba(0,0,0,.06);
       cursor: default;
+    }
+    .widget-card:not(.locked-card):hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,.08), 0 8px 28px rgba(0,0,0,.07);
     }
 
     .widget-card iframe {
@@ -166,60 +201,76 @@
       width: 100%;
       height: 100%;
       border: none;
-      /* Block pointer events until this agent is selected */
       pointer-events: none;
     }
-    /* Allow interaction only on active agent */
     .agent-col.active .widget-card iframe { pointer-events: auto; }
 
-    /* Click interceptor: transparent layer on top of inactive iframes */
     .click-interceptor {
       position: absolute;
       inset: 0;
       z-index: 5;
       cursor: pointer;
     }
-    /* Remove interceptor when active */
     .agent-col.active .click-interceptor { display: none; }
 
-    /* Lock overlay (shown when another agent is active) */
+    /* ── Lock overlay ── */
     .lock-overlay {
       display: none;
       position: absolute;
       inset: 0;
-      background: rgba(8,8,16,.82);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
+      background: rgba(245,245,247,.88);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       z-index: 10;
       align-items: center;
       justify-content: center;
       flex-direction: column;
-      gap: .75rem;
-      border-radius: 16px;
+      gap: .8rem;
+      border-radius: 18px;
     }
     .lock-overlay.visible { display: flex; }
-    .lock-icon { font-size: 1.8rem; opacity: .4; }
+    .lock-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      background: #f0ebff;
+      border: 1px solid #ddd6fe;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem;
+    }
     .lock-overlay p {
       font-size: .78rem;
       color: var(--muted);
       text-align: center;
       padding: 0 1.5rem;
       line-height: 1.6;
+      font-weight: 400;
     }
+    .lock-overlay strong { color: var(--accent); font-weight: 600; }
 
+    /* ── Footer ── */
     footer {
       text-align: center;
-      padding: 1.5rem;
-      color: rgba(255,255,255,.08);
+      padding: 1.6rem;
+      color: var(--muted);
       font-size: .75rem;
       border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+    }
+    footer .footer-dot {
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--border);
     }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>Voice Agents</h1>
+  <div class="logo-mark"><span></span> Arreglatech</div>
+  <h1>Voice <em>Agents</em></h1>
   <p>Selecciona un agente para iniciar una conversación de voz</p>
 </header>
 
@@ -232,7 +283,11 @@
   <div class="grid" id="grid"></div>
 </main>
 
-<footer>Powered by Design Team &mdash; Arreglatech</footer>
+<footer>
+  Powered by Design Team
+  <span class="footer-dot"></span>
+  Arreglatech
+</footer>
 
 <script>
   const agents = [
@@ -251,11 +306,7 @@
           ${a.name}
           <span class="live-dot"></span>
         </div>
-        <button
-          class="refresh-btn"
-          title="Reiniciar agente"
-          onclick="reloadAgent('${a.id}')"
-        >↺</button>
+        <button class="refresh-btn" title="Reiniciar agente" onclick="reloadAgent('${a.id}')">↺</button>
       </div>
       <div class="widget-card" id="card-${a.id}">
         <iframe
@@ -264,46 +315,29 @@
           allow="microphone; autoplay"
           allowfullscreen
         ></iframe>
-        <!-- Transparent layer: captures first click to lock others, then lets go -->
-        <div
-          class="click-interceptor"
-          id="interceptor-${a.id}"
-          onclick="handleFirstClick('${a.id}')"
-        ></div>
-        <!-- Lock overlay: shown when a different agent is active -->
+        <div class="click-interceptor" id="interceptor-${a.id}" onclick="handleFirstClick('${a.id}')"></div>
         <div class="lock-overlay" id="lock-${a.id}">
           <div class="lock-icon">🔒</div>
-          <p>Sesión en curso con <strong id="lock-name-${a.id}"></strong></p>
+          <p>Sesión en curso con<br><strong id="lock-name-${a.id}"></strong></p>
         </div>
       </div>
     </div>
   `).join('');
 
-  // First click on an inactive card: lock others, then pass click through
   function handleFirstClick(id) {
-    if (activeId !== null) return; // another is active, interceptor already hidden
+    if (activeId !== null) return;
     setActive(id);
-    // Remove the interceptor so next clicks reach the iframe directly
-    const interceptor = document.getElementById('interceptor-' + id);
-    interceptor.style.display = 'none';
+    document.getElementById('interceptor-' + id).style.display = 'none';
   }
 
-  // postMessage from iframes (call-started / call-ended)
   window.addEventListener('message', (e) => {
-    if (e.data?.type === 'call-started') {
-      const match = agents.find(a => {
-        const f = document.getElementById('frame-' + a.id);
-        return f && f.contentWindow === e.source;
-      });
-      if (match) setActive(match.id);
-    }
-    if (e.data?.type === 'call-ended') {
-      const match = agents.find(a => {
-        const f = document.getElementById('frame-' + a.id);
-        return f && f.contentWindow === e.source;
-      });
-      if (match && activeId === match.id) endSession();
-    }
+    const match = agents.find(a => {
+      const f = document.getElementById('frame-' + a.id);
+      return f && f.contentWindow === e.source;
+    });
+    if (!match) return;
+    if (e.data?.type === 'call-started') setActive(match.id);
+    if (e.data?.type === 'call-ended' && activeId === match.id) endSession();
   });
 
   function setActive(id) {
@@ -311,7 +345,6 @@
     const agent = agents.find(a => a.id === id);
     document.getElementById('active-name').textContent = agent.name;
     document.getElementById('status-bar').classList.add('visible');
-
     agents.forEach(a => {
       const col  = document.getElementById('col-' + a.id);
       const lock = document.getElementById('lock-' + a.id);
@@ -333,29 +366,20 @@
     agents.forEach(a => {
       document.getElementById('col-' + a.id).classList.remove('active');
       document.getElementById('lock-' + a.id).classList.remove('visible');
-      // Restore interceptor so next click is captured again
       const interceptor = document.getElementById('interceptor-' + a.id);
       if (interceptor) interceptor.style.display = '';
     });
   }
 
   function reloadAgent(id) {
-    // If this agent is active, end session first
     if (activeId === id) endSession();
-
     const btn = document.querySelector(`#col-${id} .refresh-btn`);
     btn.classList.add('spinning');
     setTimeout(() => btn.classList.remove('spinning'), 500);
-
     const frame = document.getElementById('frame-' + id);
     const agent = agents.find(a => a.id === id);
-    // Force reload by clearing src then restoring
     frame.src = '';
-    setTimeout(() => {
-      frame.src = `agent.html?agent_id=${agent.agentId}&t=${Date.now()}`;
-    }, 100);
-
-    // Restore interceptor
+    setTimeout(() => { frame.src = `agent.html?agent_id=${agent.agentId}&t=${Date.now()}`; }, 100);
     const interceptor = document.getElementById('interceptor-' + id);
     if (interceptor) interceptor.style.display = '';
   }
