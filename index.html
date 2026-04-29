@@ -9,14 +9,14 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0a0a0f;
-      --surface: #12121a;
-      --surface2: #1a1a26;
-      --border: #2a2a3d;
+      --bg: #080810;
+      --surface: #0f0f1a;
+      --border: #1e1e30;
+      --border-active: #7c5cfc;
       --accent: #7c5cfc;
       --accent2: #a78bfa;
       --text: #e8e8f0;
-      --muted: #6b6b85;
+      --muted: #52526e;
       --success: #22c55e;
       --danger: #ef4444;
     }
@@ -33,226 +33,163 @@
     /* ── Header ── */
     header {
       text-align: center;
-      padding: 3rem 1rem 1.5rem;
-    }
-    header::after {
-      content: '';
-      display: block;
-      width: 80px;
-      height: 3px;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      border-radius: 99px;
-      margin: 1.2rem auto 0;
-    }
-    .badge {
-      display: inline-block;
-      background: rgba(124,92,252,.15);
-      border: 1px solid rgba(124,92,252,.35);
-      color: var(--accent2);
-      font-size: .75rem;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      padding: .3rem .9rem;
-      border-radius: 99px;
-      margin-bottom: 1rem;
+      padding: 3.5rem 1rem 2.5rem;
     }
     header h1 {
-      font-size: clamp(1.8rem, 4vw, 2.8rem);
-      font-weight: 700;
-      letter-spacing: -.02em;
-      background: linear-gradient(135deg, #fff 30%, var(--accent2));
+      font-size: clamp(2.8rem, 8vw, 5rem);
+      font-weight: 800;
+      letter-spacing: -.03em;
+      color: rgba(255,255,255,.08);
+      line-height: 1;
+      margin-bottom: .6rem;
+      background: linear-gradient(180deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,.04) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
     header p {
       color: var(--muted);
-      margin-top: .6rem;
-      font-size: 1rem;
+      font-size: .95rem;
+      letter-spacing: .01em;
     }
 
-    /* ── Status bar ── */
+    /* ── Status banner ── */
     #status-bar {
       display: none;
       align-items: center;
       gap: .6rem;
-      max-width: 700px;
-      margin: 1rem auto 0;
-      background: rgba(124,92,252,.12);
-      border: 1px solid rgba(124,92,252,.3);
+      max-width: 720px;
+      margin: 0 auto 1.5rem;
+      background: rgba(124,92,252,.1);
+      border: 1px solid rgba(124,92,252,.25);
       border-radius: 10px;
-      padding: .65rem 1.2rem;
-      font-size: .9rem;
+      padding: .6rem 1.2rem;
+      font-size: .88rem;
       color: var(--accent2);
     }
     #status-bar.visible { display: flex; }
     .dot {
-      width: 8px; height: 8px;
+      width: 7px; height: 7px;
       background: var(--success);
       border-radius: 50%;
-      animation: pulse 1.5s infinite;
+      animation: pulse 1.4s infinite;
       flex-shrink: 0;
     }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
-    #status-bar button {
-      margin-left: auto;
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.25} }
+    #status-bar span { flex: 1; }
+    #end-btn {
       background: none;
-      border: 1px solid var(--danger);
+      border: 1px solid rgba(239,68,68,.5);
       color: var(--danger);
       border-radius: 6px;
-      padding: .25rem .75rem;
+      padding: .2rem .7rem;
       cursor: pointer;
       font-size: .8rem;
       transition: background .2s;
     }
-    #status-bar button:hover { background: rgba(239,68,68,.15); }
+    #end-btn:hover { background: rgba(239,68,68,.12); }
 
     /* ── Grid ── */
     main {
       flex: 1;
-      padding: 2rem 1rem 4rem;
+      padding: 0 1.5rem 4rem;
     }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
-      max-width: 1000px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      max-width: 1050px;
       margin: 0 auto;
     }
+    @media (max-width: 700px) {
+      .grid { grid-template-columns: 1fr; }
+    }
 
-    /* ── Card ── */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 2rem 1.5rem 1.5rem;
+    /* ── Agent column ── */
+    .agent-col {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-      transition: border-color .3s, transform .3s, opacity .3s;
-      position: relative;
-      overflow: hidden;
-      cursor: default;
+      gap: .75rem;
     }
-    .card::before {
-      content: '';
+    .agent-label {
+      font-size: .85rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding-left: .25rem;
+      transition: color .3s;
+    }
+    .agent-col.active .agent-label { color: var(--accent2); }
+
+    /* ── Widget card ── */
+    .widget-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+      transition: border-color .35s, box-shadow .35s;
+      aspect-ratio: 9 / 14;
+      display: flex;
+      flex-direction: column;
+    }
+    .agent-col.active .widget-card {
+      border-color: var(--border-active);
+      box-shadow: 0 0 0 1px var(--border-active), 0 12px 40px rgba(124,92,252,.2);
+    }
+
+    /* Widget fills the card */
+    .widget-card elevenlabs-convai {
+      display: block;
+      width: 100%;
+      flex: 1;
+    }
+
+    /* ── Lock overlay ── */
+    .lock-overlay {
+      display: none;
       position: absolute;
       inset: 0;
-      background: radial-gradient(ellipse at 50% 0%, rgba(124,92,252,.12) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    .card:not(.locked):not(.active):hover {
-      border-color: var(--accent);
-      transform: translateY(-4px);
-    }
-    .card.locked {
-      opacity: .4;
-      pointer-events: none;
-      filter: grayscale(.5);
-    }
-    .card.active {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 1px var(--accent), 0 8px 32px rgba(124,92,252,.25);
-    }
-
-    /* Avatar */
-    .avatar {
-      width: 80px; height: 80px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      display: flex;
+      background: rgba(8,8,16,.72);
+      backdrop-filter: blur(4px);
+      z-index: 10;
       align-items: center;
       justify-content: center;
+      flex-direction: column;
+      gap: .75rem;
+      border-radius: 16px;
+    }
+    .lock-overlay.visible { display: flex; }
+    .lock-icon {
       font-size: 2rem;
-      position: relative;
-      z-index: 1;
+      opacity: .5;
     }
-    .avatar .ring {
-      position: absolute;
-      inset: -5px;
-      border-radius: 50%;
-      border: 2px solid transparent;
-      transition: border-color .3s;
-    }
-    .card.active .avatar .ring {
-      border-color: var(--accent);
-      animation: spin-ring 3s linear infinite;
-    }
-    @keyframes spin-ring { to { transform: rotate(360deg); } }
-
-    .card h2 { font-size: 1.35rem; font-weight: 600; }
-    .card .role {
-      font-size: .82rem;
+    .lock-overlay p {
+      font-size: .8rem;
       color: var(--muted);
       text-align: center;
+      padding: 0 1rem;
       line-height: 1.5;
     }
 
-    /* Wave */
-    .wave {
-      display: flex;
-      align-items: center;
-      gap: 3px;
-      height: 24px;
+    /* ── Active indicator dot on label ── */
+    .agent-label .live-dot {
+      display: none;
+      width: 6px; height: 6px;
+      background: var(--success);
+      border-radius: 50%;
+      animation: pulse 1.4s infinite;
+      vertical-align: middle;
+      margin-left: 6px;
     }
-    .wave span {
-      display: block;
-      width: 3px;
-      border-radius: 99px;
-      background: var(--accent2);
-      opacity: .3;
-    }
-    .card.active .wave span { opacity: 1; }
-    .wave span:nth-child(1){height:6px;  animation:bar 1.1s .0s ease-in-out infinite alternate}
-    .wave span:nth-child(2){height:14px; animation:bar 1.1s .1s ease-in-out infinite alternate}
-    .wave span:nth-child(3){height:20px; animation:bar 1.1s .2s ease-in-out infinite alternate}
-    .wave span:nth-child(4){height:14px; animation:bar 1.1s .3s ease-in-out infinite alternate}
-    .wave span:nth-child(5){height:8px;  animation:bar 1.1s .4s ease-in-out infinite alternate}
-    .wave span:nth-child(6){height:18px; animation:bar 1.1s .5s ease-in-out infinite alternate}
-    .wave span:nth-child(7){height:10px; animation:bar 1.1s .6s ease-in-out infinite alternate}
-    @keyframes bar { from{transform:scaleY(.4)} to{transform:scaleY(1)} }
-
-    /* CTA */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      padding: .7rem 1.6rem;
-      border-radius: 99px;
-      font-size: .9rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      transition: filter .2s, transform .15s;
-      z-index: 1;
-    }
-    .btn:active { transform: scale(.97); }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #fff;
-    }
-    .btn-primary:hover { filter: brightness(1.12); }
-    .btn-end {
-      background: rgba(239,68,68,.12);
-      border: 1px solid var(--danger);
-      color: var(--danger);
-    }
-    .btn-end:hover { background: rgba(239,68,68,.22); }
-
-    /* ── Widget container dentro de la card ── */
-    .widget-slot {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      min-height: 80px;
-    }
+    .agent-col.active .agent-label .live-dot { display: inline-block; }
 
     footer {
       text-align: center;
       padding: 1.5rem;
-      color: var(--muted);
-      font-size: .78rem;
+      color: rgba(255,255,255,.1);
+      font-size: .75rem;
       border-top: 1px solid var(--border);
     }
   </style>
@@ -260,18 +197,18 @@
 <body>
 
 <header>
-  <div class="badge">Demo interactiva</div>
   <h1>Voice Agents</h1>
   <p>Selecciona un agente para iniciar una conversación de voz</p>
-
-  <div id="status-bar">
-    <span class="dot"></span>
-    <span>Sesión activa con <strong id="active-name"></strong></span>
-    <button onclick="endSession()">Terminar sesión</button>
-  </div>
 </header>
 
 <main>
+  <!-- Status bar -->
+  <div id="status-bar">
+    <span class="dot"></span>
+    <span>Sesión activa con <strong id="active-name"></strong></span>
+    <button id="end-btn" onclick="endSession()">Terminar sesión</button>
+  </div>
+
   <div class="grid" id="grid"></div>
 </main>
 
@@ -282,79 +219,101 @@
     {
       id: 'cindy',
       name: 'Cindy',
-      emoji: '👩‍💼',
-      role: 'Asistente de ventas y atención al cliente.',
       agentId: 'agent_8001kqcwjt80ek9be1q8865tpmg5',
     },
     {
       id: 'vanessa',
       name: 'Vanessa',
-      emoji: '👩‍🔬',
-      role: 'Especialista en soporte técnico y consultas.',
       agentId: 'agent_5601kqd9rrmgfe2bp53yb07x04kd',
     },
     {
       id: 'tripti',
       name: 'Tripti',
-      emoji: '👩‍🎨',
-      role: 'Agente de experiencia y feedback de usuario.',
       agentId: 'agent_2101kqd9yxgef1xv216215nbc466',
     },
   ];
 
   let activeId = null;
 
-  function renderGrid() {
+  function buildGrid() {
     const grid = document.getElementById('grid');
-    grid.innerHTML = agents.map(a => {
-      const isActive = activeId === a.id;
-      const isLocked = activeId !== null && !isActive;
-      return `
-        <div class="card ${isActive ? 'active' : ''} ${isLocked ? 'locked' : ''}" id="card-${a.id}">
-          <div class="avatar">
-            ${a.emoji}
-            <div class="ring"></div>
-          </div>
-          <h2>${a.name}</h2>
-          <p class="role">${a.role}</p>
-          <div class="wave">
-            <span></span><span></span><span></span><span></span>
-            <span></span><span></span><span></span>
-          </div>
-          ${isActive ? `
-            <div class="widget-slot">
-              <elevenlabs-convai agent-id="${a.agentId}"></elevenlabs-convai>
-            </div>
-            <button class="btn btn-end" onclick="endSession()">Terminar sesión</button>
-          ` : `
-            <button class="btn btn-primary" onclick="startSession('${a.id}')">
-              ▶ Hablar con ${a.name}
-            </button>
-          `}
+    grid.innerHTML = agents.map(a => `
+      <div class="agent-col" id="col-${a.id}">
+        <div class="agent-label">
+          ${a.name}<span class="live-dot"></span>
         </div>
-      `;
-    }).join('');
+        <div class="widget-card">
+          <elevenlabs-convai
+            id="widget-${a.id}"
+            agent-id="${a.agentId}"
+          ></elevenlabs-convai>
+          <div class="lock-overlay" id="lock-${a.id}">
+            <div class="lock-icon">🔒</div>
+            <p>Sesión activa con <strong id="lock-name-${a.id}"></strong></p>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    // Attach event listeners after DOM is built
+    agents.forEach(a => attachWidgetEvents(a));
   }
 
-  function startSession(id) {
+  function attachWidgetEvents(agent) {
+    const widget = document.getElementById('widget-' + agent.id);
+    if (!widget) return;
+
+    // ElevenLabs convai widget dispatches these custom events
+    widget.addEventListener('elevenlabs-convai:call-started', () => {
+      setActive(agent.id);
+    });
+    widget.addEventListener('elevenlabs-convai:call-ended', () => {
+      if (activeId === agent.id) endSession();
+    });
+
+    // Fallback: also watch for the widget's internal shadow DOM click
+    // In case call-started event name differs across widget versions
+    widget.addEventListener('call-started', () => setActive(agent.id));
+    widget.addEventListener('call-ended', () => {
+      if (activeId === agent.id) endSession();
+    });
+  }
+
+  function setActive(id) {
     activeId = id;
     const agent = agents.find(a => a.id === id);
+
+    // Update status bar
     document.getElementById('active-name').textContent = agent.name;
     document.getElementById('status-bar').classList.add('visible');
-    renderGrid();
-    // Scroll a la card activa
-    setTimeout(() => {
-      document.getElementById('card-' + id)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 100);
+
+    // Update cards
+    agents.forEach(a => {
+      const col = document.getElementById('col-' + a.id);
+      const lock = document.getElementById('lock-' + a.id);
+      const lockName = document.getElementById('lock-name-' + a.id);
+
+      if (a.id === id) {
+        col.classList.add('active');
+        lock.classList.remove('visible');
+      } else {
+        col.classList.remove('active');
+        lock.classList.add('visible');
+        lockName.textContent = agent.name;
+      }
+    });
   }
 
   function endSession() {
     activeId = null;
     document.getElementById('status-bar').classList.remove('visible');
-    renderGrid();
+    agents.forEach(a => {
+      document.getElementById('col-' + a.id).classList.remove('active');
+      document.getElementById('lock-' + a.id).classList.remove('visible');
+    });
   }
 
-  renderGrid();
+  buildGrid();
 </script>
 </body>
 </html>
