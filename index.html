@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Voice Agents — Demo</title>
-  <script src="https://elevenlabs.io/convai-widget/index.js" async></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -39,7 +38,6 @@
       font-size: clamp(2.8rem, 8vw, 5rem);
       font-weight: 800;
       letter-spacing: -.03em;
-      color: rgba(255,255,255,.08);
       line-height: 1;
       margin-bottom: .6rem;
       background: linear-gradient(180deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,.04) 100%);
@@ -50,7 +48,6 @@
     header p {
       color: var(--muted);
       font-size: .95rem;
-      letter-spacing: .01em;
     }
 
     /* ── Status banner ── */
@@ -76,8 +73,8 @@
       flex-shrink: 0;
     }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.25} }
-    #status-bar span { flex: 1; }
     #end-btn {
+      margin-left: auto;
       background: none;
       border: 1px solid rgba(239,68,68,.5);
       color: var(--danger);
@@ -98,7 +95,7 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 1.25rem;
-      max-width: 1050px;
+      max-width: 1100px;
       margin: 0 auto;
     }
     @media (max-width: 700px) {
@@ -112,15 +109,26 @@
       gap: .75rem;
     }
     .agent-label {
-      font-size: .85rem;
+      font-size: .8rem;
       font-weight: 700;
-      letter-spacing: .06em;
+      letter-spacing: .1em;
       text-transform: uppercase;
       color: var(--muted);
       padding-left: .25rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
       transition: color .3s;
     }
     .agent-col.active .agent-label { color: var(--accent2); }
+    .live-dot {
+      display: none;
+      width: 6px; height: 6px;
+      background: var(--success);
+      border-radius: 50%;
+      animation: pulse 1.4s infinite;
+    }
+    .agent-col.active .live-dot { display: block; }
 
     /* ── Widget card ── */
     .widget-card {
@@ -131,19 +139,17 @@
       position: relative;
       transition: border-color .35s, box-shadow .35s;
       aspect-ratio: 9 / 14;
-      display: flex;
-      flex-direction: column;
     }
     .agent-col.active .widget-card {
       border-color: var(--border-active);
       box-shadow: 0 0 0 1px var(--border-active), 0 12px 40px rgba(124,92,252,.2);
     }
 
-    /* Widget fills the card */
-    .widget-card elevenlabs-convai {
+    .widget-card iframe {
       display: block;
       width: 100%;
-      flex: 1;
+      height: 100%;
+      border: none;
     }
 
     /* ── Lock overlay ── */
@@ -151,44 +157,31 @@
       display: none;
       position: absolute;
       inset: 0;
-      background: rgba(8,8,16,.72);
-      backdrop-filter: blur(4px);
+      background: rgba(8,8,16,.8);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
       z-index: 10;
       align-items: center;
       justify-content: center;
       flex-direction: column;
       gap: .75rem;
       border-radius: 16px;
+      cursor: not-allowed;
     }
     .lock-overlay.visible { display: flex; }
-    .lock-icon {
-      font-size: 2rem;
-      opacity: .5;
-    }
+    .lock-icon { font-size: 1.8rem; opacity: .45; }
     .lock-overlay p {
-      font-size: .8rem;
+      font-size: .78rem;
       color: var(--muted);
       text-align: center;
-      padding: 0 1rem;
-      line-height: 1.5;
+      padding: 0 1.5rem;
+      line-height: 1.6;
     }
-
-    /* ── Active indicator dot on label ── */
-    .agent-label .live-dot {
-      display: none;
-      width: 6px; height: 6px;
-      background: var(--success);
-      border-radius: 50%;
-      animation: pulse 1.4s infinite;
-      vertical-align: middle;
-      margin-left: 6px;
-    }
-    .agent-col.active .agent-label .live-dot { display: inline-block; }
 
     footer {
       text-align: center;
       padding: 1.5rem;
-      color: rgba(255,255,255,.1);
+      color: rgba(255,255,255,.08);
       font-size: .75rem;
       border-top: 1px solid var(--border);
     }
@@ -202,7 +195,6 @@
 </header>
 
 <main>
-  <!-- Status bar -->
   <div id="status-bar">
     <span class="dot"></span>
     <span>Sesión activa con <strong id="active-name"></strong></span>
@@ -216,83 +208,65 @@
 
 <script>
   const agents = [
-    {
-      id: 'cindy',
-      name: 'Cindy',
-      agentId: 'agent_8001kqcwjt80ek9be1q8865tpmg5',
-    },
-    {
-      id: 'vanessa',
-      name: 'Vanessa',
-      agentId: 'agent_5601kqd9rrmgfe2bp53yb07x04kd',
-    },
-    {
-      id: 'tripti',
-      name: 'Tripti',
-      agentId: 'agent_2101kqd9yxgef1xv216215nbc466',
-    },
+    { id: 'cindy',   name: 'Cindy',   agentId: 'agent_8001kqcwjt80ek9be1q8865tpmg5' },
+    { id: 'vanessa', name: 'Vanessa', agentId: 'agent_5601kqd9rrmgfe2bp53yb07x04kd' },
+    { id: 'tripti',  name: 'Tripti',  agentId: 'agent_2101kqd9yxgef1xv216215nbc466' },
   ];
 
   let activeId = null;
 
-  function buildGrid() {
-    const grid = document.getElementById('grid');
-    grid.innerHTML = agents.map(a => `
-      <div class="agent-col" id="col-${a.id}">
-        <div class="agent-label">
-          ${a.name}<span class="live-dot"></span>
-        </div>
-        <div class="widget-card">
-          <elevenlabs-convai
-            id="widget-${a.id}"
-            agent-id="${a.agentId}"
-          ></elevenlabs-convai>
-          <div class="lock-overlay" id="lock-${a.id}">
-            <div class="lock-icon">🔒</div>
-            <p>Sesión activa con <strong id="lock-name-${a.id}"></strong></p>
-          </div>
+  // Build grid with iframes pointing to agent.html?agent_id=...
+  const grid = document.getElementById('grid');
+  grid.innerHTML = agents.map(a => `
+    <div class="agent-col" id="col-${a.id}">
+      <div class="agent-label">
+        ${a.name}
+        <span class="live-dot"></span>
+      </div>
+      <div class="widget-card">
+        <iframe
+          id="frame-${a.id}"
+          src="agent.html?agent_id=${a.agentId}"
+          allow="microphone; autoplay"
+          allowfullscreen
+        ></iframe>
+        <div class="lock-overlay" id="lock-${a.id}">
+          <div class="lock-icon">🔒</div>
+          <p>Sesión en curso con <strong id="lock-name-${a.id}"></strong></p>
         </div>
       </div>
-    `).join('');
+    </div>
+  `).join('');
 
-    // Attach event listeners after DOM is built
-    agents.forEach(a => attachWidgetEvents(a));
-  }
-
-  function attachWidgetEvents(agent) {
-    const widget = document.getElementById('widget-' + agent.id);
-    if (!widget) return;
-
-    // ElevenLabs convai widget dispatches these custom events
-    widget.addEventListener('elevenlabs-convai:call-started', () => {
-      setActive(agent.id);
-    });
-    widget.addEventListener('elevenlabs-convai:call-ended', () => {
-      if (activeId === agent.id) endSession();
-    });
-
-    // Fallback: also watch for the widget's internal shadow DOM click
-    // In case call-started event name differs across widget versions
-    widget.addEventListener('call-started', () => setActive(agent.id));
-    widget.addEventListener('call-ended', () => {
-      if (activeId === agent.id) endSession();
-    });
-  }
+  // Listen for postMessage events from iframes
+  window.addEventListener('message', (e) => {
+    if (e.data?.type === 'call-started') {
+      // Find which iframe sent the message
+      const frame = agents.find(a => {
+        const f = document.getElementById('frame-' + a.id);
+        return f && f.contentWindow === e.source;
+      });
+      if (frame) setActive(frame.id);
+    }
+    if (e.data?.type === 'call-ended') {
+      const frame = agents.find(a => {
+        const f = document.getElementById('frame-' + a.id);
+        return f && f.contentWindow === e.source;
+      });
+      if (frame && activeId === frame.id) endSession();
+    }
+  });
 
   function setActive(id) {
     activeId = id;
     const agent = agents.find(a => a.id === id);
-
-    // Update status bar
     document.getElementById('active-name').textContent = agent.name;
     document.getElementById('status-bar').classList.add('visible');
 
-    // Update cards
     agents.forEach(a => {
-      const col = document.getElementById('col-' + a.id);
+      const col  = document.getElementById('col-' + a.id);
       const lock = document.getElementById('lock-' + a.id);
       const lockName = document.getElementById('lock-name-' + a.id);
-
       if (a.id === id) {
         col.classList.add('active');
         lock.classList.remove('visible');
@@ -312,8 +286,6 @@
       document.getElementById('lock-' + a.id).classList.remove('visible');
     });
   }
-
-  buildGrid();
 </script>
 </body>
 </html>
