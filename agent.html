@@ -29,13 +29,36 @@
       document.getElementById('widget').setAttribute('agent-id', agentId);
     }
 
-    // Notify parent when call starts/ends
     const widget = document.getElementById('widget');
+
+    // Notify parent when call starts/ends
     ['elevenlabs-convai:call-started', 'call-started'].forEach(ev => {
       widget.addEventListener(ev, () => window.parent.postMessage({ type: 'call-started' }, '*'));
     });
     ['elevenlabs-convai:call-ended', 'call-ended'].forEach(ev => {
       widget.addEventListener(ev, () => window.parent.postMessage({ type: 'call-ended' }, '*'));
+    });
+
+    // Listen for hang-up command from parent
+    window.addEventListener('message', (e) => {
+      if (e.data?.type === 'hang-up') {
+        // Try the widget's public endSession method, then fall back to clicking the end-call button
+        if (typeof widget.endSession === 'function') {
+          widget.endSession();
+        } else {
+          // Walk shadow DOM to find and click the hang-up/end button
+          const tryClick = (root) => {
+            if (!root) return false;
+            const btn = root.querySelector('[aria-label*="end" i], [aria-label*="hang" i], [aria-label*="colgar" i], button.end-call, button[class*="end"]');
+            if (btn) { btn.click(); return true; }
+            for (const el of root.querySelectorAll('*')) {
+              if (el.shadowRoot && tryClick(el.shadowRoot)) return true;
+            }
+            return false;
+          };
+          tryClick(widget.shadowRoot || document);
+        }
+      }
     });
   </script>
 </body>

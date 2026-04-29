@@ -361,6 +361,13 @@
   }
 
   function endSession() {
+    // Send hang-up to the active iframe before clearing state
+    if (activeId) {
+      const activeFrame = document.getElementById('frame-' + activeId);
+      if (activeFrame?.contentWindow) {
+        activeFrame.contentWindow.postMessage({ type: 'hang-up' }, '*');
+      }
+    }
     activeId = null;
     document.getElementById('status-bar').classList.remove('visible');
     agents.forEach(a => {
