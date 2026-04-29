@@ -39,8 +39,27 @@
       widget.addEventListener(ev, () => window.parent.postMessage({ type: 'call-ended' }, '*'));
     });
 
-    // Listen for hang-up command from parent
+    // Listen for commands from parent
     window.addEventListener('message', (e) => {
+      if (e.data?.type === 'start-call') {
+        // Try widget.startSession(), then fall back to clicking the call button
+        if (typeof widget.startSession === 'function') {
+          widget.startSession();
+        } else {
+          const tryClick = (root) => {
+            if (!root) return false;
+            // ElevenLabs call button typically has aria-label with "call" or "start"
+            const btn = root.querySelector('[aria-label*="call" i], [aria-label*="start" i], [aria-label*="llamar" i], button[class*="call"], button[class*="start"]');
+            if (btn) { btn.click(); return true; }
+            for (const el of root.querySelectorAll('*')) {
+              if (el.shadowRoot && tryClick(el.shadowRoot)) return true;
+            }
+            return false;
+          };
+          // Small delay to ensure widget is fully rendered
+          setTimeout(() => tryClick(widget.shadowRoot || document), 300);
+        }
+      }
       if (e.data?.type === 'hang-up') {
         // Try the widget's public endSession method, then fall back to clicking the end-call button
         if (typeof widget.endSession === 'function') {

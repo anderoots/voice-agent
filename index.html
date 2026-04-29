@@ -328,6 +328,11 @@
     if (activeId !== null) return;
     setActive(id);
     document.getElementById('interceptor-' + id).style.display = 'none';
+    // Trigger the call inside the widget immediately
+    const frame = document.getElementById('frame-' + id);
+    if (frame?.contentWindow) {
+      frame.contentWindow.postMessage({ type: 'start-call' }, '*');
+    }
   }
 
   window.addEventListener('message', (e) => {
