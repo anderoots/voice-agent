@@ -30,7 +30,6 @@
       flex-direction: column;
     }
 
-    /* ── Header ── */
     header {
       text-align: center;
       padding: 4rem 1rem 2.5rem;
@@ -56,7 +55,6 @@
       font-size: clamp(2rem, 5vw, 3.2rem);
       font-weight: 700;
       letter-spacing: -.03em;
-      color: var(--text);
       line-height: 1.1;
       margin-bottom: .6rem;
     }
@@ -67,13 +65,9 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    header p {
-      color: var(--muted);
-      font-size: .95rem;
-      font-weight: 400;
-    }
+    header p { color: var(--muted); font-size: .95rem; }
 
-    /* ── Status bar ── */
+    /* Status bar */
     #status-bar {
       display: none;
       align-items: center;
@@ -85,7 +79,6 @@
       border-radius: 12px;
       padding: .65rem 1.2rem;
       font-size: .85rem;
-      color: var(--text);
       box-shadow: 0 1px 6px rgba(0,0,0,.06);
     }
     #status-bar.visible { display: flex; }
@@ -112,7 +105,6 @@
     }
     #end-btn:hover { background: #fef2f2; }
 
-    /* ── Main ── */
     main { flex: 1; padding: 2rem 1.5rem 5rem; }
 
     .grid {
@@ -124,7 +116,6 @@
     }
     @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
 
-    /* ── Agent column ── */
     .agent-col { display: flex; flex-direction: column; gap: .8rem; }
 
     .agent-label-row {
@@ -171,7 +162,11 @@
     .refresh-btn.spinning { animation: spin .5s linear; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Widget card ── */
+    /* ── Widget card ──
+       transform: translateZ(0) creates a new containing block so the
+       widget's internal position:fixed renders inside the card, not the
+       viewport. This lets the user click the real ElevenLabs button
+       directly, preserving the user-gesture chain for mic access.       */
     .widget-card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -186,6 +181,8 @@
       align-items: center;
       justify-content: center;
       gap: 1.5rem;
+      /* Trap position:fixed children inside this card */
+      transform: translateZ(0);
     }
     .agent-col.active .widget-card {
       border-color: var(--border-active);
@@ -194,14 +191,14 @@
                   0 1px 3px rgba(0,0,0,.06);
     }
 
-    /* Widget hidden — audio engine only */
+    /* The ElevenLabs widget fills the card so its button is clickable
+       anywhere inside the card area. */
     elevenlabs-convai {
-      position: fixed !important;
-      bottom: -9999px !important;
-      right: -9999px !important;
-      opacity: 0 !important;
-      width: 1px !important;
-      height: 1px !important;
+      position: absolute !important;
+      inset: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      z-index: 3;
     }
 
     /* Avatar orb */
@@ -228,46 +225,27 @@
     .card-name {
       font-size: 1.1rem;
       font-weight: 600;
-      color: var(--text);
       letter-spacing: -.01em;
-    }
-
-    .call-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      padding: .7rem 2rem;
-      border-radius: 99px;
-      font-size: .88rem;
-      font-weight: 600;
-      font-family: inherit;
-      cursor: pointer;
-      border: none;
-      transition: filter .18s, transform .15s, background .25s;
       position: relative;
-      z-index: 2;
+      z-index: 1;
     }
-    .call-btn:active { transform: scale(.96); }
-    .call-btn.start {
-      background: linear-gradient(135deg, var(--accent), #a78bfa);
-      color: #fff;
-      box-shadow: 0 4px 14px rgba(107,78,250,.35);
-    }
-    .call-btn.start:hover { filter: brightness(1.08); }
-    .call-btn.end {
-      background: #fef2f2;
-      color: var(--danger);
-      border: 1px solid #fca5a5;
-      box-shadow: none;
-    }
-    .call-btn.end:hover { background: #fee2e2; }
 
-    /* Talking indicator */
+    .card-hint {
+      font-size: .78rem;
+      color: var(--muted);
+      position: relative;
+      z-index: 1;
+    }
+    .agent-col.active .card-hint { display: none; }
+
+    /* Talking bars */
     .talking-indicator {
       display: none;
       align-items: center;
       gap: 4px;
       height: 20px;
+      position: relative;
+      z-index: 1;
     }
     .agent-col.active .talking-indicator { display: flex; }
     .talking-indicator span {
@@ -283,15 +261,15 @@
     .talking-indicator span:nth-child(5){height:8px;  animation:bar 1s .4s ease-in-out infinite alternate}
     @keyframes bar { from{transform:scaleY(.3)} to{transform:scaleY(1)} }
 
-    /* ── Lock overlay ── */
+    /* Lock overlay — sits above the widget (z-index > 3) */
     .lock-overlay {
       display: none;
       position: absolute;
       inset: 0;
-      background: rgba(245,245,247,.88);
+      background: rgba(245,245,247,.9);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
-      z-index: 10;
+      z-index: 20;
       align-items: center;
       justify-content: center;
       flex-direction: column;
@@ -313,11 +291,9 @@
       text-align: center;
       padding: 0 1.5rem;
       line-height: 1.6;
-      font-weight: 400;
     }
     .lock-overlay strong { color: var(--accent); font-weight: 600; }
 
-    /* ── Footer ── */
     footer {
       text-align: center;
       padding: 1.6rem;
@@ -368,7 +344,6 @@
 
   let activeId = null;
 
-  // Build grid + hidden widgets
   const grid = document.getElementById('grid');
   grid.innerHTML = agents.map(a => `
     <div class="agent-col" id="col-${a.id}">
@@ -380,14 +355,16 @@
         <button class="refresh-btn" title="Reiniciar agente" onclick="reloadAgent('${a.id}')">↺</button>
       </div>
       <div class="widget-card" id="card-${a.id}">
+        <!-- ElevenLabs widget fills the card — user clicks its button directly -->
+        <elevenlabs-convai id="widget-${a.id}" agent-id="${a.agentId}"></elevenlabs-convai>
+        <!-- Decorative layer behind the widget -->
         <div class="card-avatar">${a.emoji}</div>
         <div class="card-name">${a.name}</div>
         <div class="talking-indicator">
           <span></span><span></span><span></span><span></span><span></span>
         </div>
-        <button class="call-btn start" id="btn-${a.id}" onclick="startCall('${a.id}')">
-          📞 Llamar
-        </button>
+        <div class="card-hint">Toca para llamar</div>
+        <!-- Lock overlay — blocks inactive agents -->
         <div class="lock-overlay" id="lock-${a.id}">
           <div class="lock-icon">🔒</div>
           <p>Sesión en curso con<br><strong id="lock-name-${a.id}"></strong></p>
@@ -396,87 +373,18 @@
     </div>
   `).join('');
 
-  // Create hidden widgets (outside grid, off-screen via CSS)
+  // Wire up widget events
   agents.forEach(a => {
-    const w = document.createElement('elevenlabs-convai');
-    w.id = 'widget-' + a.id;
-    w.setAttribute('agent-id', a.agentId);
-    document.body.appendChild(w);
-
-    // Listen for call state events from widget
+    const w = document.getElementById('widget-' + a.id);
     ['elevenlabs-convai:call-started', 'call-started'].forEach(ev =>
-      w.addEventListener(ev, () => { if (activeId === a.id) setActive(a.id); })
+      w.addEventListener(ev, () => onCallStarted(a.id))
     );
     ['elevenlabs-convai:call-ended', 'call-ended'].forEach(ev =>
       w.addEventListener(ev, () => { if (activeId === a.id) endSession(); })
     );
   });
 
-  function getWidget(id) {
-    return document.getElementById('widget-' + id);
-  }
-
-  // Shadow DOM traversal — click the first matching element
-  function clickInShadow(root, selectors) {
-    for (const sel of selectors) {
-      const el = root.querySelector(sel);
-      if (el) { el.click(); return true; }
-    }
-    for (const el of root.querySelectorAll('*')) {
-      if (el.shadowRoot && clickInShadow(el.shadowRoot, selectors)) return true;
-    }
-    return false;
-  }
-
-  function triggerWidgetStart(id) {
-    const w = getWidget(id);
-    if (!w) return;
-    if (typeof w.startSession === 'function') {
-      w.startSession();
-      return;
-    }
-    // Shadow DOM fallback with retries
-    let attempts = 0;
-    const try_ = () => {
-      const root = w.shadowRoot || w;
-      const found = clickInShadow(root, [
-        '[aria-label*="call" i]',
-        '[aria-label*="start" i]',
-        '[aria-label*="talk" i]',
-        'button',
-        '[role="button"]',
-      ]);
-      if (!found && ++attempts < 12) setTimeout(try_, 300);
-    };
-    try_();
-  }
-
-  function triggerWidgetEnd(id) {
-    const w = getWidget(id);
-    if (!w) return;
-    if (typeof w.endSession === 'function') {
-      w.endSession();
-      return;
-    }
-    clickInShadow(w.shadowRoot || w, [
-      '[aria-label*="end" i]',
-      '[aria-label*="hang" i]',
-      '[aria-label*="stop" i]',
-      'button',
-    ]);
-  }
-
-  function startCall(id) {
-    if (activeId !== null) return;
-    setActive(id);
-    const btn = document.getElementById('btn-' + id);
-    btn.className = 'call-btn end';
-    btn.innerHTML = '📵 Colgar';
-    btn.onclick = () => endSession();
-    triggerWidgetStart(id);
-  }
-
-  function setActive(id) {
+  function onCallStarted(id) {
     activeId = id;
     const agent = agents.find(a => a.id === id);
     document.getElementById('active-name').textContent = agent.name;
@@ -484,22 +392,21 @@
     agents.forEach(a => {
       const col  = document.getElementById('col-' + a.id);
       const lock = document.getElementById('lock-' + a.id);
-      const lockName = document.getElementById('lock-name-' + a.id);
       if (a.id === id) {
         col.classList.add('active');
         lock.classList.remove('visible');
       } else {
         col.classList.remove('active');
         lock.classList.add('visible');
-        lockName.textContent = agent.name;
+        document.getElementById('lock-name-' + a.id).textContent = agent.name;
       }
     });
   }
 
   function endSession() {
     if (activeId) {
-      triggerWidgetEnd(activeId);
-      resetBtn(activeId);
+      const w = document.getElementById('widget-' + activeId);
+      if (w && typeof w.endSession === 'function') w.endSession();
     }
     activeId = null;
     document.getElementById('status-bar').classList.remove('visible');
@@ -509,34 +416,28 @@
     });
   }
 
-  function resetBtn(id) {
-    const btn = document.getElementById('btn-' + id);
-    if (!btn) return;
-    btn.className = 'call-btn start';
-    btn.innerHTML = '📞 Llamar';
-    btn.onclick = () => startCall(id);
-  }
-
   function reloadAgent(id) {
     if (activeId === id) endSession();
     const btn = document.querySelector(`#col-${id} .refresh-btn`);
     btn.classList.add('spinning');
     setTimeout(() => btn.classList.remove('spinning'), 500);
-    // Replace widget element to force re-init
-    const old = getWidget(id);
-    if (old) old.remove();
+
     const agent = agents.find(a => a.id === id);
+    const card  = document.getElementById('card-' + id);
+    const old   = document.getElementById('widget-' + id);
+    if (old) old.remove();
+
     const w = document.createElement('elevenlabs-convai');
     w.id = 'widget-' + id;
     w.setAttribute('agent-id', agent.agentId);
-    document.body.appendChild(w);
+    card.prepend(w);
+
     ['elevenlabs-convai:call-started', 'call-started'].forEach(ev =>
-      w.addEventListener(ev, () => { if (activeId === id) setActive(id); })
+      w.addEventListener(ev, () => onCallStarted(id))
     );
     ['elevenlabs-convai:call-ended', 'call-ended'].forEach(ev =>
       w.addEventListener(ev, () => { if (activeId === id) endSession(); })
     );
-    resetBtn(id);
   }
 </script>
 </body>
