@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-04-30T00:00:00Z",
+  "title": "Design System: Voice Agents — Arreglatech",
+  "extensions": {
+    "colorMeta": {
+      "accent":        { "role": "primary",   "displayName": "Signal Violet",  "canonical": "oklch(52% 0.22 280)", "tonalRamp": ["#1a0a4a","#2d1580","#4020b8","#6b4efa","#8b6ef8","#b09bfb","#d4c8fd","#f0ebff"] },
+      "accent-soft":   { "role": "primary",   "displayName": "Soft Violet",    "canonical": "oklch(60% 0.19 280)", "tonalRamp": ["#2a1860","#3d25a0","#6245e0","#8b6ef8","#a690fa","#c4b3fc","#ddd6fe","#f5f0ff"] },
+      "accent-tint":   { "role": "primary",   "displayName": "Violet Tint",    "canonical": "oklch(95% 0.04 280)", "tonalRamp": ["#2d1580","#4020b8","#6b4efa","#8b6ef8","#c4b3fc","#ddd6fe","#ede9fe","#f0ebff"] },
+      "bg":            { "role": "neutral",   "displayName": "Page Ground",    "canonical": "oklch(97% 0.004 270)", "tonalRamp": ["#1a1a2e","#2e2e4a","#6b6b8a","#8e8ea8","#b8b8cc","#d5d5e2","#e4e4e9","#f5f5f7"] },
+      "surface":       { "role": "neutral",   "displayName": "Surface White",  "canonical": "oklch(100% 0 0)",      "tonalRamp": ["#1a1a2e","#3d3d5c","#7a7a9a","#a0a0b8","#c8c8d8","#e0e0ea","#f0f0f5","#ffffff"] },
+      "surface-low":   { "role": "neutral",   "displayName": "Surface Low",    "canonical": "oklch(98% 0.002 270)", "tonalRamp": ["#1a1a2e","#3d3d5c","#7a7a9a","#a0a0b8","#c8c8d8","#e4e4e9","#f0f0f4","#fafafa"] },
+      "border":        { "role": "neutral",   "displayName": "Border Rest",    "canonical": "oklch(91% 0.008 270)", "tonalRamp": ["#1a1a2e","#3d3d5c","#7a7a9a","#b0b0c8","#c8c8d8","#d8d8e4","#e0e0ea","#e4e4e9"] },
+      "text":          { "role": "neutral",   "displayName": "Ink",            "canonical": "oklch(18% 0.03 280)",  "tonalRamp": ["#0a0a1a","#1a1a2e","#2e2e4a","#4a4a6a","#6b6b8a","#8e8ea8","#b8b8cc","#e4e4e9"] },
+      "muted":         { "role": "neutral",   "displayName": "Muted",          "canonical": "oklch(60% 0.04 280)",  "tonalRamp": ["#1a1a2e","#3d3d5c","#5a5a7a","#8e8ea8","#a8a8c0","#c0c0d4","#d5d5e2","#ededf5"] },
+      "success":       { "role": "tertiary",  "displayName": "Live Green",     "canonical": "oklch(50% 0.17 145)",  "tonalRamp": ["#052e10","#0a5420","#0d7a30","#16a34a","#22c55e","#4ade80","#86efac","#dcfce7"] },
+      "danger":        { "role": "secondary", "displayName": "Danger Red",     "canonical": "oklch(50% 0.22 25)",   "tonalRamp": ["#450a0a","#7f1d1d","#b91c1c","#dc2626","#ef4444","#f87171","#fca5a5","#fee2e2"] }
+    },
+    "typographyMeta": {
+      "display":  { "displayName": "Display",  "purpose": "Page title only. One instance per page." },
+      "headline": { "displayName": "Headline", "purpose": "Agent names inside cards." },
+      "body":     { "displayName": "Body",     "purpose": "Subtitles, status messages, captions. Max 65ch." },
+      "label":    { "displayName": "Label",    "purpose": "Column headers and logotype. Uppercase, tracked." }
+    },
+    "shadows": [
+      { "name": "ambient-rest",    "value": "0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04)", "purpose": "All agent cards at rest." },
+      { "name": "active-session",  "value": "0 0 0 1px #6b4efa, 0 8px 32px rgba(107,78,250,.15), 0 1px 3px rgba(0,0,0,.06)", "purpose": "Active card during a voice session." },
+      { "name": "status-bar",      "value": "0 1px 6px rgba(0,0,0,.06)", "purpose": "Floating session status bar." },
+      { "name": "call-button",     "value": "0 4px 14px rgba(107,78,250,.35)", "purpose": "Primary call button resting state." }
+    ],
+    "motion": [
+      { "name": "transition-state",  "value": "border-color .35s ease, box-shadow .35s ease", "purpose": "Card state transitions (idle to active)." },
+      { "name": "transition-color",  "value": ".2s ease",                                     "purpose": "Color/background transitions on controls." },
+      { "name": "transition-button", "value": "filter .18s ease, transform .15s ease",         "purpose": "Call button hover and press feedback." },
+      { "name": "pulse",             "value": "pulse 1.4s infinite",                           "purpose": "Live session dots (status bar + card label)." },
+      { "name": "orb-pulse",         "value": "orb-pulse 2s ease-in-out infinite",             "purpose": "Avatar ring glow during active session." },
+      { "name": "talking-bar",       "value": "bar 1s ease-in-out infinite alternate",         "purpose": "Talking indicator bars, staggered 0.1s each." }
+    ],
+    "breakpoints": [
+      { "name": "mobile", "value": "700px", "behavior": "Single column grid (from 3 columns)" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Call Button — Start",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary action to start a voice session. Pill-shaped, violet gradient.",
+      "html": "<button class=\"ds-btn-call-start\">📞 Llamar</button>",
+      "css": ".ds-btn-call-start { display: inline-flex; align-items: center; gap: .5rem; padding: .7rem 2rem; border-radius: 99px; font-size: .88rem; font-weight: 600; font-family: Inter, system-ui, sans-serif; cursor: pointer; border: none; background: linear-gradient(135deg, #6b4efa, #a78bfa); color: #fff; box-shadow: 0 4px 14px rgba(107,78,250,.35); transition: filter .18s ease, transform .15s ease; } .ds-btn-call-start:hover { filter: brightness(1.08); } .ds-btn-call-start:active { transform: scale(.96); }"
+    },
+    {
+      "name": "Call Button — End",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Hang-up action. Same pill shape, danger color role.",
+      "html": "<button class=\"ds-btn-call-end\">📵 Colgar</button>",
+      "css": ".ds-btn-call-end { display: inline-flex; align-items: center; gap: .5rem; padding: .7rem 2rem; border-radius: 99px; font-size: .88rem; font-weight: 600; font-family: Inter, system-ui, sans-serif; cursor: pointer; border: 1px solid #fca5a5; background: #fef2f2; color: #dc2626; box-shadow: none; transition: background .2s ease, transform .15s ease; } .ds-btn-call-end:hover { background: #fee2e2; } .ds-btn-call-end:active { transform: scale(.96); }"
+    },
+    {
+      "name": "Agent Card — Rest",
+      "kind": "card",
+      "refersTo": "card-agent",
+      "description": "Idle agent card. White surface, quiet border, ambient shadow.",
+      "html": "<div class=\"ds-agent-card\"><div class=\"ds-avatar\">👩‍💼</div><div class=\"ds-card-name\">Cindy</div><button class=\"ds-btn-call-start\">📞 Llamar</button></div>",
+      "css": ".ds-agent-card { background: #fff; border: 1px solid #e4e4e9; border-radius: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; padding: 2rem 1rem; aspect-ratio: 9/14; position: relative; box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04); transition: border-color .35s ease, box-shadow .35s ease; } .ds-avatar { width: 90px; height: 90px; border-radius: 50%; background: linear-gradient(135deg, #ede9fe, #ddd6fe); border: 2px solid #e0d9ff; display: flex; align-items: center; justify-content: center; font-size: 2.4rem; } .ds-card-name { font-size: 1.1rem; font-weight: 600; color: #1a1a2e; letter-spacing: -.01em; font-family: Inter, system-ui, sans-serif; } .ds-btn-call-start { display: inline-flex; align-items: center; gap: .5rem; padding: .7rem 2rem; border-radius: 99px; font-size: .88rem; font-weight: 600; font-family: Inter, system-ui, sans-serif; cursor: pointer; border: none; background: linear-gradient(135deg, #6b4efa, #a78bfa); color: #fff; box-shadow: 0 4px 14px rgba(107,78,250,.35); }"
+    },
+    {
+      "name": "Refresh Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ghost icon button to reload an agent. Subtle at rest, violet on hover.",
+      "html": "<button class=\"ds-btn-refresh\" title=\"Reiniciar agente\">↺</button>",
+      "css": ".ds-btn-refresh { background: none; border: 1px solid #e4e4e9; color: #8e8ea8; border-radius: 7px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: .9rem; transition: border-color .2s ease, color .2s ease, background .2s ease; } .ds-btn-refresh:hover { border-color: #6b4efa; color: #6b4efa; background: #f0ebff; }"
+    },
+    {
+      "name": "Status Bar",
+      "kind": "custom",
+      "refersTo": "card-agent",
+      "description": "Floating session indicator shown when a call is active.",
+      "html": "<div class=\"ds-status-bar\"><span class=\"ds-live-dot\"></span><span>Sesión activa con <strong>Cindy</strong></span><button class=\"ds-end-btn\">Terminar sesión</button></div>",
+      "css": ".ds-status-bar { display: flex; align-items: center; gap: .6rem; background: #fff; border: 1px solid #e4e4e9; border-radius: 12px; padding: .65rem 1.2rem; font-size: .85rem; color: #1a1a2e; box-shadow: 0 1px 6px rgba(0,0,0,.06); font-family: Inter, system-ui, sans-serif; } .ds-live-dot { width: 7px; height: 7px; background: #16a34a; border-radius: 50%; animation: ds-pulse 1.4s infinite; flex-shrink: 0; } @keyframes ds-pulse { 0%,100%{opacity:1} 50%{opacity:.3} } .ds-status-bar strong { font-weight: 600; } .ds-end-btn { margin-left: auto; background: none; border: 1px solid #fca5a5; color: #dc2626; border-radius: 7px; padding: .22rem .75rem; cursor: pointer; font-size: .78rem; font-weight: 500; font-family: inherit; transition: background .2s ease; } .ds-end-btn:hover { background: #fef2f2; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Signal Room",
+    "overview": "This is a control room, not a landing page. Someone on the Arreglatech team opens it with a specific goal: start a voice session, assess an agent, close the loop. The design serves that intent without friction. Every element either carries state or enables action — nothing decorates for its own sake.\n\nThe system lives in a well-lit office environment, on a laptop or a secondary monitor. Light mode is correct here: this is a working tool, not a cinematic experience. The surface is cool-white with a faint gray warmth, the accent is a precise violet-indigo that signals interactivity without performing excitement.\n\nWhat this system explicitly rejects: the SaaS landing-page convention of gradient cards, purple hero blobs, and 'AI-powered' orb animations that confuse decoration with functionality. No navy-gray corporatism. No sterile minimalism that strips out all personality.",
+    "keyCharacteristics": [
+      "State is always legible: idle / active / locked are visually unambiguous",
+      "Accent used sparingly — only on interactive and active elements",
+      "Cards earn their existence: three agents, three decision points, no nesting",
+      "Typography is single-family (Inter), differentiated through weight and scale",
+      "Motion is functional: pulse for live status, orb glow for active session, talking bars for voice activity"
+    ],
+    "rules": [
+      { "name": "The Scarcity Rule",          "body": "Signal Violet appears on at most 10% of any screen surface. When everything is accented, nothing is.", "section": "colors" },
+      { "name": "The No-Purple-Surface Rule", "body": "Violet tint (#f0ebff) is a hover state, not a card or section background. No purple gradients on non-interactive surfaces.", "section": "colors" },
+      { "name": "The Single Family Rule",     "body": "Inter only. No mixing of typefaces. Weight and scale create all hierarchy.", "section": "typography" },
+      { "name": "The State-as-Elevation Rule","body": "Shadows change only when state changes. Hover does not increase elevation on cards. Only an active voice session earns the full shadow treatment.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use Signal Violet exclusively for interactive and active-state elements.",
+      "Do change elevation (border + shadow) as the state signal for an active session.",
+      "Do use uppercase tracked labels only for wayfinding: column headers, the logotype.",
+      "Do keep the three-card grid as the only layout structure — no nesting.",
+      "Do let motion serve state: pulse, orb glow, talking bars are status communications."
+    ],
+    "donts": [
+      "Don't use purple or violet gradients on any non-interactive surface.",
+      "Don't introduce navy blue, mid-gray, or enterprise palette colors (corporativo frío).",
+      "Don't strip away all personality in the name of cleanliness (minimalismo sin personalidad).",
+      "Don't use glassmorphism decoratively — the lock overlay blur is functional.",
+      "Don't use border-left or border-right greater than 1px as an accent stripe.",
+      "Don't add gradient text (background-clip: text) on any element.",
+      "Don't animate layout properties (width, height, padding, margin).",
+      "Don't use linear easing for any user-facing transition."
+    ]
+  }
+}
