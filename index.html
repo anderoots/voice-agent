@@ -239,14 +239,14 @@
     .card-avatar {
       width: 80px; height: 80px;
       border-radius: 50%;
-      background: #f0ecff;
-      border: 1.5px solid #ddd6fe;
+      background: var(--avatar-bg, #f0ecff);
+      border: 1.5px solid var(--avatar-border, #ddd6fe);
       display: flex; align-items: center; justify-content: center;
       position: relative;
       z-index: 1;
       transition: border-color .25s ease, box-shadow .25s ease;
       pointer-events: none;
-      color: #a78bfa;
+      color: var(--avatar-color, #a78bfa);
       overflow: hidden;
     }
     .card-avatar svg {
@@ -382,29 +382,19 @@
 </footer>
 
 <script>
-  // Silhouette SVGs — three subtle variants to differentiate agents visually
-  const AVATAR_SVGS = {
-    // Short hair / neutral
-    cindy: `<svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <circle cx="22" cy="16" r="7.5" fill="currentColor" opacity=".9"/>
-      <path d="M6 40c0-8.837 7.163-16 16-16s16 7.163 16 16" fill="currentColor" opacity=".7"/>
-    </svg>`,
-    // Slightly wider shoulders
-    vanessa: `<svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <circle cx="22" cy="15.5" r="7" fill="currentColor" opacity=".9"/>
-      <path d="M4 40c0-9.941 8.059-18 18-18s18 8.059 18 18" fill="currentColor" opacity=".7"/>
-    </svg>`,
-    // Slightly taller head placement
-    tripti: `<svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <circle cx="22" cy="16" r="7.5" fill="currentColor" opacity=".9"/>
-      <path d="M8 41c0-7.732 6.268-14 14-14s14 6.268 14 14" fill="currentColor" opacity=".7"/>
-    </svg>`,
-  };
+  // Single consistent silhouette for all agents
+  const AVATAR_SVG = `<svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <circle cx="22" cy="16" r="7.5" fill="currentColor" opacity=".9"/>
+    <path d="M6 40c0-8.837 7.163-16 16-16s16 7.163 16 16" fill="currentColor" opacity=".7"/>
+  </svg>`;
 
   const agents = [
-    { id: 'cindy',   name: 'Cindy',   agentId: 'agent_8001kqcwjt80ek9be1q8865tpmg5' },
-    { id: 'vanessa', name: 'Vanessa', agentId: 'agent_5601kqd9rrmgfe2bp53yb07x04kd' },
-    { id: 'tripti',  name: 'Tripti',  agentId: 'agent_2101kqd9yxgef1xv216215nbc466' },
+    { id: 'cindy',   name: 'Cindy',   agentId: 'agent_8001kqcwjt80ek9be1q8865tpmg5',
+      avatarBg: '#f0ecff', avatarBorder: '#ddd6fe', avatarColor: '#9d7ff0' }, // violeta
+    { id: 'vanessa', name: 'Vanessa', agentId: 'agent_5601kqd9rrmgfe2bp53yb07x04kd',
+      avatarBg: '#eef2ff', avatarBorder: '#c7d2fe', avatarColor: '#6574f0' }, // índigo
+    { id: 'tripti',  name: 'Tripti',  agentId: 'agent_2101kqd9yxgef1xv216215nbc466',
+      avatarBg: '#fdf2f8', avatarBorder: '#fbcfe8', avatarColor: '#d4609a' }, // rosa
   ];
 
   const REFRESH_ICON = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`;
@@ -424,7 +414,7 @@
       <div class="widget-card" id="card-${a.id}" role="button" tabindex="0" aria-label="Llamar a ${a.name}">
         <elevenlabs-convai id="widget-${a.id}" agent-id="${a.agentId}"></elevenlabs-convai>
         <div class="widget-loading" id="loading-${a.id}"></div>
-        <div class="card-avatar">${AVATAR_SVGS[a.id]}</div>
+        <div class="card-avatar" style="--avatar-bg:${a.avatarBg};--avatar-border:${a.avatarBorder};--avatar-color:${a.avatarColor}">${AVATAR_SVG}</div>
         <div class="card-name">${a.name}</div>
         <div class="in-call-badge">
           <span class="in-call-dot"></span>
