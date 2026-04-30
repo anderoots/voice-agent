@@ -182,36 +182,111 @@
       position: relative;
       aspect-ratio: 9 / 14;
       transition: border-color .35s, box-shadow .35s;
-      cursor: pointer;
       box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.04);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
     }
     .agent-col.active .widget-card {
       border-color: var(--border-active);
       box-shadow: 0 0 0 1px var(--border-active),
                   0 8px 32px rgba(107,78,250,.15),
                   0 1px 3px rgba(0,0,0,.06);
-      cursor: default;
-    }
-    .widget-card:not(.locked-card):hover {
-      box-shadow: 0 2px 8px rgba(0,0,0,.08), 0 8px 28px rgba(0,0,0,.07);
     }
 
+    /* Hidden iframe — widget as audio engine only */
     .widget-card iframe {
-      display: block;
-      width: 100%;
-      height: 100%;
-      border: none;
-      pointer-events: none;
-    }
-    .agent-col.active .widget-card iframe { pointer-events: auto; }
-
-    .click-interceptor {
       position: absolute;
-      inset: 0;
-      z-index: 5;
-      cursor: pointer;
+      width: 1px; height: 1px;
+      opacity: 0;
+      pointer-events: none;
+      border: none;
     }
-    .agent-col.active .click-interceptor { display: none; }
+
+    /* Avatar orb */
+    .card-avatar {
+      width: 90px; height: 90px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+      border: 2px solid #e0d9ff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.4rem;
+      transition: transform .3s;
+      position: relative;
+      z-index: 1;
+    }
+    .agent-col.active .card-avatar {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 6px rgba(107,78,250,.08);
+      animation: orb-pulse 2s ease-in-out infinite;
+    }
+    @keyframes orb-pulse {
+      0%,100% { box-shadow: 0 0 0 6px rgba(107,78,250,.08); }
+      50%      { box-shadow: 0 0 0 14px rgba(107,78,250,.04); }
+    }
+
+    .card-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -.01em;
+    }
+
+    /* Call / Hang-up button */
+    .call-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      padding: .7rem 2rem;
+      border-radius: 99px;
+      font-size: .88rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      transition: filter .18s, transform .15s, background .25s;
+      position: relative;
+      z-index: 2;
+    }
+    .call-btn:active { transform: scale(.96); }
+    .call-btn.start {
+      background: linear-gradient(135deg, var(--accent), #a78bfa);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(107,78,250,.35);
+    }
+    .call-btn.start:hover { filter: brightness(1.08); }
+    .call-btn.end {
+      background: #fef2f2;
+      color: var(--danger);
+      border: 1px solid #fca5a5;
+      box-shadow: none;
+    }
+    .call-btn.end:hover { background: #fee2e2; }
+
+    /* Talking indicator */
+    .talking-indicator {
+      display: none;
+      align-items: center;
+      gap: 4px;
+      height: 20px;
+    }
+    .agent-col.active .talking-indicator { display: flex; }
+    .talking-indicator span {
+      display: block;
+      width: 3px;
+      border-radius: 99px;
+      background: var(--accent);
+    }
+    .talking-indicator span:nth-child(1){height:6px;  animation:bar 1s .0s ease-in-out infinite alternate}
+    .talking-indicator span:nth-child(2){height:14px; animation:bar 1s .1s ease-in-out infinite alternate}
+    .talking-indicator span:nth-child(3){height:20px; animation:bar 1s .2s ease-in-out infinite alternate}
+    .talking-indicator span:nth-child(4){height:14px; animation:bar 1s .3s ease-in-out infinite alternate}
+    .talking-indicator span:nth-child(5){height:8px;  animation:bar 1s .4s ease-in-out infinite alternate}
+    @keyframes bar { from{transform:scaleY(.3)} to{transform:scaleY(1)} }
+
+    .click-interceptor { display: none; }
 
     /* ── Lock overlay ── */
     .lock-overlay {
@@ -291,9 +366,9 @@
 
 <script>
   const agents = [
-    { id: 'cindy',   name: 'Cindy',   agentId: 'agent_8001kqcwjt80ek9be1q8865tpmg5' },
-    { id: 'vanessa', name: 'Vanessa', agentId: 'agent_5601kqd9rrmgfe2bp53yb07x04kd' },
-    { id: 'tripti',  name: 'Tripti',  agentId: 'agent_2101kqd9yxgef1xv216215nbc466' },
+    { id: 'cindy',   name: 'Cindy',   emoji: '👩‍💼', agentId: 'agent_8001kqcwjt80ek9be1q8865tpmg5' },
+    { id: 'vanessa', name: 'Vanessa', emoji: '👩‍🔬', agentId: 'agent_5601kqd9rrmgfe2bp53yb07x04kd' },
+    { id: 'tripti',  name: 'Tripti',  emoji: '👩‍🎨', agentId: 'agent_2101kqd9yxgef1xv216215nbc466' },
   ];
 
   let activeId = null;
@@ -309,13 +384,23 @@
         <button class="refresh-btn" title="Reiniciar agente" onclick="reloadAgent('${a.id}')">↺</button>
       </div>
       <div class="widget-card" id="card-${a.id}">
+        <!-- Widget hidden — runs as audio engine only -->
         <iframe
           id="frame-${a.id}"
           src="agent.html?agent_id=${a.agentId}"
           allow="microphone; autoplay"
           allowfullscreen
         ></iframe>
-        <div class="click-interceptor" id="interceptor-${a.id}" onclick="handleFirstClick('${a.id}')"></div>
+        <!-- Our own UI -->
+        <div class="card-avatar">${a.emoji}</div>
+        <div class="card-name">${a.name}</div>
+        <div class="talking-indicator">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <button class="call-btn start" id="btn-${a.id}" onclick="startCall('${a.id}')">
+          📞 Llamar
+        </button>
+        <!-- Lock overlay -->
         <div class="lock-overlay" id="lock-${a.id}">
           <div class="lock-icon">🔒</div>
           <p>Sesión en curso con<br><strong id="lock-name-${a.id}"></strong></p>
@@ -324,15 +409,17 @@
     </div>
   `).join('');
 
-  function handleFirstClick(id) {
+  function startCall(id) {
     if (activeId !== null) return;
     setActive(id);
-    document.getElementById('interceptor-' + id).style.display = 'none';
-    // Trigger the call inside the widget immediately
+    // Switch button to "Colgar"
+    const btn = document.getElementById('btn-' + id);
+    btn.className = 'call-btn end';
+    btn.innerHTML = '📵 Colgar';
+    btn.onclick = () => endSession();
+    // Tell iframe to start the call
     const frame = document.getElementById('frame-' + id);
-    if (frame?.contentWindow) {
-      frame.contentWindow.postMessage({ type: 'start-call' }, '*');
-    }
+    if (frame?.contentWindow) frame.contentWindow.postMessage({ type: 'start-call' }, '*');
   }
 
   window.addEventListener('message', (e) => {
@@ -366,21 +453,26 @@
   }
 
   function endSession() {
-    // Send hang-up to the active iframe before clearing state
     if (activeId) {
       const activeFrame = document.getElementById('frame-' + activeId);
-      if (activeFrame?.contentWindow) {
-        activeFrame.contentWindow.postMessage({ type: 'hang-up' }, '*');
-      }
+      if (activeFrame?.contentWindow) activeFrame.contentWindow.postMessage({ type: 'hang-up' }, '*');
+      // Reset button back to "Llamar"
+      resetBtn(activeId);
     }
     activeId = null;
     document.getElementById('status-bar').classList.remove('visible');
     agents.forEach(a => {
       document.getElementById('col-' + a.id).classList.remove('active');
       document.getElementById('lock-' + a.id).classList.remove('visible');
-      const interceptor = document.getElementById('interceptor-' + a.id);
-      if (interceptor) interceptor.style.display = '';
     });
+  }
+
+  function resetBtn(id) {
+    const btn = document.getElementById('btn-' + id);
+    if (!btn) return;
+    btn.className = 'call-btn start';
+    btn.innerHTML = '📞 Llamar';
+    btn.onclick = () => startCall(id);
   }
 
   function reloadAgent(id) {
@@ -392,8 +484,7 @@
     const agent = agents.find(a => a.id === id);
     frame.src = '';
     setTimeout(() => { frame.src = `agent.html?agent_id=${agent.agentId}&t=${Date.now()}`; }, 100);
-    const interceptor = document.getElementById('interceptor-' + id);
-    if (interceptor) interceptor.style.display = '';
+    resetBtn(id);
   }
 </script>
 </body>

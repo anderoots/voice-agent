@@ -9,14 +9,15 @@
     html, body {
       width: 100%; height: 100%;
       background: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       overflow: hidden;
     }
-    /* Force the widget to stay centered, not floating to corner */
+    /* Hide the widget visually — it runs in background as audio engine */
     elevenlabs-convai {
-      position: static !important;
+      position: fixed !important;
+      bottom: -9999px !important;
+      right: -9999px !important;
+      pointer-events: none !important;
+      opacity: 0 !important;
     }
   </style>
 </head>
@@ -25,57 +26,56 @@
   <script>
     const params = new URLSearchParams(location.search);
     const agentId = params.get('agent_id');
-    if (agentId) {
-      document.getElementById('widget').setAttribute('agent-id', agentId);
-    }
+    if (agentId) document.getElementById('widget').setAttribute('agent-id', agentId);
 
     const widget = document.getElementById('widget');
 
-    // Notify parent when call starts/ends
-    ['elevenlabs-convai:call-started', 'call-started'].forEach(ev => {
-      widget.addEventListener(ev, () => window.parent.postMessage({ type: 'call-started' }, '*'));
-    });
-    ['elevenlabs-convai:call-ended', 'call-ended'].forEach(ev => {
-      widget.addEventListener(ev, () => window.parent.postMessage({ type: 'call-ended' }, '*'));
-    });
+    // Bubble call state up to parent
+    ['elevenlabs-convai:call-started', 'call-started'].forEach(ev =>
+      widget.addEventListener(ev, () => window.parent.postMessage({ type: 'call-started' }, '*'))
+    );
+    ['elevenlabs-convai:call-ended', 'call-ended'].forEach(ev =>
+      widget.addEventListener(ev, () => window.parent.postMessage({ type: 'call-ended' }, '*'))
+    );
 
-    // Listen for commands from parent
+    // Click the first button found inside shadow DOM (works for both start and end)
+    function clickInShadow(root, selectors) {
+      for (const sel of selectors) {
+        const el = root.querySelector(sel);
+        if (el) { el.click(); return true; }
+      }
+      for (const el of root.querySelectorAll('*')) {
+        if (el.shadowRoot && clickInShadow(el.shadowRoot, selectors)) return true;
+      }
+      return false;
+    }
+
     window.addEventListener('message', (e) => {
       if (e.data?.type === 'start-call') {
-        // Try widget.startSession(), then fall back to clicking the call button
         if (typeof widget.startSession === 'function') {
           widget.startSession();
         } else {
-          const tryClick = (root) => {
-            if (!root) return false;
-            // ElevenLabs call button typically has aria-label with "call" or "start"
-            const btn = root.querySelector('[aria-label*="call" i], [aria-label*="start" i], [aria-label*="llamar" i], button[class*="call"], button[class*="start"]');
-            if (btn) { btn.click(); return true; }
-            for (const el of root.querySelectorAll('*')) {
-              if (el.shadowRoot && tryClick(el.shadowRoot)) return true;
-            }
-            return false;
+          // Retry a few times until the widget button is in the DOM
+          let attempts = 0;
+          const try_ = () => {
+            const found = clickInShadow(widget.shadowRoot || document, [
+              '[aria-label*="call" i]', '[aria-label*="start" i]',
+              'button', '[role="button"]',
+            ]);
+            if (!found && ++attempts < 8) setTimeout(try_, 300);
           };
-          // Small delay to ensure widget is fully rendered
-          setTimeout(() => tryClick(widget.shadowRoot || document), 300);
+          setTimeout(try_, 200);
         }
       }
+
       if (e.data?.type === 'hang-up') {
-        // Try the widget's public endSession method, then fall back to clicking the end-call button
         if (typeof widget.endSession === 'function') {
           widget.endSession();
         } else {
-          // Walk shadow DOM to find and click the hang-up/end button
-          const tryClick = (root) => {
-            if (!root) return false;
-            const btn = root.querySelector('[aria-label*="end" i], [aria-label*="hang" i], [aria-label*="colgar" i], button.end-call, button[class*="end"]');
-            if (btn) { btn.click(); return true; }
-            for (const el of root.querySelectorAll('*')) {
-              if (el.shadowRoot && tryClick(el.shadowRoot)) return true;
-            }
-            return false;
-          };
-          tryClick(widget.shadowRoot || document);
+          clickInShadow(widget.shadowRoot || document, [
+            '[aria-label*="end" i]', '[aria-label*="hang" i]',
+            '[aria-label*="stop" i]', 'button',
+          ]);
         }
       }
     });
