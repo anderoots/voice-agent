@@ -189,8 +189,11 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      gap: .8rem;
+      justify-content: flex-start;
+      padding-top: 2.25rem;
+      /* Reserve bottom area for the ElevenLabs widget — prevents overlap */
+      padding-bottom: 168px;
+      gap: .7rem;
       cursor: pointer;
       /* Creates containing block for position:fixed in widget shadow DOM */
       transform: translateZ(0);
@@ -208,7 +211,7 @@
     /* ElevenLabs widget — fills card, user clicks its own button */
     elevenlabs-convai {
       position: absolute !important;
-      bottom: 44px !important;
+      bottom: 20px !important;
       left: 50% !important;
       right: auto !important;
       transform: translateX(-50%) !important;
@@ -218,7 +221,7 @@
     /* Loading shimmer shown while widget custom element is not yet defined */
     .widget-loading {
       position: absolute;
-      bottom: 44px;
+      bottom: 60px;
       left: 50%;
       transform: translateX(-50%);
       width: 64px; height: 64px;
