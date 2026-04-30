@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Voice Agents — Arreglatech</title>
+  <script src="https://elevenlabs.io/convai-widget/index.js" async></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -196,13 +197,18 @@
                   0 1px 3px rgba(0,0,0,.06);
     }
 
-    /* Hidden iframe — widget as audio engine only */
-    .widget-card iframe {
-      position: absolute;
-      width: 1px; height: 1px;
-      opacity: 0;
-      pointer-events: none;
-      border: none;
+    /* transform creates a containing block so position:fixed inside the
+       widget's shadow DOM renders inside the card, not the viewport */
+    .widget-card { transform: translateZ(0); }
+
+    /* Center the widget orb at the bottom of the card */
+    elevenlabs-convai {
+      position: absolute !important;
+      bottom: 52px !important;
+      left: 50% !important;
+      right: auto !important;
+      transform: translateX(-50%) !important;
+      z-index: 5;
     }
 
     /* Avatar orb */
@@ -233,37 +239,6 @@
       color: var(--text);
       letter-spacing: -.01em;
     }
-
-    /* Call / Hang-up button */
-    .call-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: .5rem;
-      padding: .7rem 2rem;
-      border-radius: 99px;
-      font-size: .88rem;
-      font-weight: 600;
-      font-family: inherit;
-      cursor: pointer;
-      border: none;
-      transition: filter .18s, transform .15s, background .25s;
-      position: relative;
-      z-index: 2;
-    }
-    .call-btn:active { transform: scale(.96); }
-    .call-btn.start {
-      background: linear-gradient(135deg, var(--accent), #a78bfa);
-      color: #fff;
-      box-shadow: 0 4px 14px rgba(107,78,250,.35);
-    }
-    .call-btn.start:hover { filter: brightness(1.08); }
-    .call-btn.end {
-      background: #fef2f2;
-      color: var(--danger);
-      border: 1px solid #fca5a5;
-      box-shadow: none;
-    }
-    .call-btn.end:hover { background: #fee2e2; }
 
     /* Talking indicator */
     .talking-indicator {
@@ -384,22 +359,13 @@
         <button class="refresh-btn" title="Reiniciar agente" onclick="reloadAgent('${a.id}')">↺</button>
       </div>
       <div class="widget-card" id="card-${a.id}">
-        <!-- Widget hidden — runs as audio engine only -->
-        <iframe
-          id="frame-${a.id}"
-          src="agent.html?agent_id=${a.agentId}"
-          allow="microphone; autoplay"
-          allowfullscreen
-        ></iframe>
-        <!-- Our own UI -->
+        <!-- ElevenLabs widget — user clicks its own button directly -->
+        <elevenlabs-convai id="widget-${a.id}" agent-id="${a.agentId}"></elevenlabs-convai>
         <div class="card-avatar">${a.emoji}</div>
         <div class="card-name">${a.name}</div>
         <div class="talking-indicator">
           <span></span><span></span><span></span><span></span><span></span>
         </div>
-        <button class="call-btn start" id="btn-${a.id}" onclick="startCall('${a.id}')">
-          📞 Llamar
-        </button>
         <!-- Lock overlay -->
         <div class="lock-overlay" id="lock-${a.id}">
           <div class="lock-icon">🔒</div>
@@ -409,27 +375,15 @@
     </div>
   `).join('');
 
-  function startCall(id) {
-    if (activeId !== null) return;
-    setActive(id);
-    // Switch button to "Colgar"
-    const btn = document.getElementById('btn-' + id);
-    btn.className = 'call-btn end';
-    btn.innerHTML = '📵 Colgar';
-    btn.onclick = () => endSession();
-    // Tell iframe to start the call
-    const frame = document.getElementById('frame-' + id);
-    if (frame?.contentWindow) frame.contentWindow.postMessage({ type: 'start-call' }, '*');
-  }
-
-  window.addEventListener('message', (e) => {
-    const match = agents.find(a => {
-      const f = document.getElementById('frame-' + a.id);
-      return f && f.contentWindow === e.source;
-    });
-    if (!match) return;
-    if (e.data?.type === 'call-started') setActive(match.id);
-    if (e.data?.type === 'call-ended' && activeId === match.id) endSession();
+  // Wire widget events
+  agents.forEach(a => {
+    const w = document.getElementById('widget-' + a.id);
+    ['elevenlabs-convai:call-started', 'call-started'].forEach(ev =>
+      w.addEventListener(ev, () => setActive(a.id))
+    );
+    ['elevenlabs-convai:call-ended', 'call-ended'].forEach(ev =>
+      w.addEventListener(ev, () => { if (activeId === a.id) endSession(); })
+    );
   });
 
   function setActive(id) {
@@ -454,10 +408,8 @@
 
   function endSession() {
     if (activeId) {
-      const activeFrame = document.getElementById('frame-' + activeId);
-      if (activeFrame?.contentWindow) activeFrame.contentWindow.postMessage({ type: 'hang-up' }, '*');
-      // Reset button back to "Llamar"
-      resetBtn(activeId);
+      const w = document.getElementById('widget-' + activeId);
+      if (w && typeof w.endSession === 'function') w.endSession();
     }
     activeId = null;
     document.getElementById('status-bar').classList.remove('visible');
@@ -467,24 +419,25 @@
     });
   }
 
-  function resetBtn(id) {
-    const btn = document.getElementById('btn-' + id);
-    if (!btn) return;
-    btn.className = 'call-btn start';
-    btn.innerHTML = '📞 Llamar';
-    btn.onclick = () => startCall(id);
-  }
-
   function reloadAgent(id) {
     if (activeId === id) endSession();
     const btn = document.querySelector(`#col-${id} .refresh-btn`);
     btn.classList.add('spinning');
     setTimeout(() => btn.classList.remove('spinning'), 500);
-    const frame = document.getElementById('frame-' + id);
     const agent = agents.find(a => a.id === id);
-    frame.src = '';
-    setTimeout(() => { frame.src = `agent.html?agent_id=${agent.agentId}&t=${Date.now()}`; }, 100);
-    resetBtn(id);
+    const card  = document.getElementById('card-' + id);
+    const old   = document.getElementById('widget-' + id);
+    if (old) old.remove();
+    const w = document.createElement('elevenlabs-convai');
+    w.id = 'widget-' + id;
+    w.setAttribute('agent-id', agent.agentId);
+    card.prepend(w);
+    ['elevenlabs-convai:call-started', 'call-started'].forEach(ev =>
+      w.addEventListener(ev, () => setActive(id))
+    );
+    ['elevenlabs-convai:call-ended', 'call-ended'].forEach(ev =>
+      w.addEventListener(ev, () => { if (activeId === id) endSession(); })
+    );
   }
 </script>
 </body>
