@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Voice Agents — Arreglatech</title>
+  <script src="https://elevenlabs.io/convai-widget/index.js" async></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -11,11 +12,9 @@
     :root {
       --bg: #f5f5f7;
       --surface: #ffffff;
-      --surface2: #fafafa;
       --border: #e4e4e9;
       --border-active: #6b4efa;
       --accent: #6b4efa;
-      --accent2: #8b6ef8;
       --text: #1a1a2e;
       --muted: #8e8ea8;
       --success: #16a34a;
@@ -156,7 +155,6 @@
     }
     .agent-col.active .live-dot { display: block; }
 
-    /* Refresh button */
     .refresh-btn {
       background: none;
       border: 1px solid var(--border);
@@ -196,13 +194,14 @@
                   0 1px 3px rgba(0,0,0,.06);
     }
 
-    /* Hidden iframe — widget as audio engine only */
-    .widget-card iframe {
-      position: absolute;
-      width: 1px; height: 1px;
-      opacity: 0;
-      pointer-events: none;
-      border: none;
+    /* Widget hidden — audio engine only */
+    elevenlabs-convai {
+      position: fixed !important;
+      bottom: -9999px !important;
+      right: -9999px !important;
+      opacity: 0 !important;
+      width: 1px !important;
+      height: 1px !important;
     }
 
     /* Avatar orb */
@@ -213,7 +212,6 @@
       border: 2px solid #e0d9ff;
       display: flex; align-items: center; justify-content: center;
       font-size: 2.4rem;
-      transition: transform .3s;
       position: relative;
       z-index: 1;
     }
@@ -234,7 +232,6 @@
       letter-spacing: -.01em;
     }
 
-    /* Call / Hang-up button */
     .call-btn {
       display: inline-flex;
       align-items: center;
@@ -285,8 +282,6 @@
     .talking-indicator span:nth-child(4){height:14px; animation:bar 1s .3s ease-in-out infinite alternate}
     .talking-indicator span:nth-child(5){height:8px;  animation:bar 1s .4s ease-in-out infinite alternate}
     @keyframes bar { from{transform:scaleY(.3)} to{transform:scaleY(1)} }
-
-    .click-interceptor { display: none; }
 
     /* ── Lock overlay ── */
     .lock-overlay {
@@ -373,6 +368,7 @@
 
   let activeId = null;
 
+  // Build grid + hidden widgets
   const grid = document.getElementById('grid');
   grid.innerHTML = agents.map(a => `
     <div class="agent-col" id="col-${a.id}">
@@ -384,14 +380,6 @@
         <button class="refresh-btn" title="Reiniciar agente" onclick="reloadAgent('${a.id}')">↺</button>
       </div>
       <div class="widget-card" id="card-${a.id}">
-        <!-- Widget hidden — runs as audio engine only -->
-        <iframe
-          id="frame-${a.id}"
-          src="agent.html?agent_id=${a.agentId}"
-          allow="microphone; autoplay"
-          allowfullscreen
-        ></iframe>
-        <!-- Our own UI -->
         <div class="card-avatar">${a.emoji}</div>
         <div class="card-name">${a.name}</div>
         <div class="talking-indicator">
@@ -400,7 +388,6 @@
         <button class="call-btn start" id="btn-${a.id}" onclick="startCall('${a.id}')">
           📞 Llamar
         </button>
-        <!-- Lock overlay -->
         <div class="lock-overlay" id="lock-${a.id}">
           <div class="lock-icon">🔒</div>
           <p>Sesión en curso con<br><strong id="lock-name-${a.id}"></strong></p>
@@ -409,28 +396,85 @@
     </div>
   `).join('');
 
+  // Create hidden widgets (outside grid, off-screen via CSS)
+  agents.forEach(a => {
+    const w = document.createElement('elevenlabs-convai');
+    w.id = 'widget-' + a.id;
+    w.setAttribute('agent-id', a.agentId);
+    document.body.appendChild(w);
+
+    // Listen for call state events from widget
+    ['elevenlabs-convai:call-started', 'call-started'].forEach(ev =>
+      w.addEventListener(ev, () => { if (activeId === a.id) setActive(a.id); })
+    );
+    ['elevenlabs-convai:call-ended', 'call-ended'].forEach(ev =>
+      w.addEventListener(ev, () => { if (activeId === a.id) endSession(); })
+    );
+  });
+
+  function getWidget(id) {
+    return document.getElementById('widget-' + id);
+  }
+
+  // Shadow DOM traversal — click the first matching element
+  function clickInShadow(root, selectors) {
+    for (const sel of selectors) {
+      const el = root.querySelector(sel);
+      if (el) { el.click(); return true; }
+    }
+    for (const el of root.querySelectorAll('*')) {
+      if (el.shadowRoot && clickInShadow(el.shadowRoot, selectors)) return true;
+    }
+    return false;
+  }
+
+  function triggerWidgetStart(id) {
+    const w = getWidget(id);
+    if (!w) return;
+    if (typeof w.startSession === 'function') {
+      w.startSession();
+      return;
+    }
+    // Shadow DOM fallback with retries
+    let attempts = 0;
+    const try_ = () => {
+      const root = w.shadowRoot || w;
+      const found = clickInShadow(root, [
+        '[aria-label*="call" i]',
+        '[aria-label*="start" i]',
+        '[aria-label*="talk" i]',
+        'button',
+        '[role="button"]',
+      ]);
+      if (!found && ++attempts < 12) setTimeout(try_, 300);
+    };
+    try_();
+  }
+
+  function triggerWidgetEnd(id) {
+    const w = getWidget(id);
+    if (!w) return;
+    if (typeof w.endSession === 'function') {
+      w.endSession();
+      return;
+    }
+    clickInShadow(w.shadowRoot || w, [
+      '[aria-label*="end" i]',
+      '[aria-label*="hang" i]',
+      '[aria-label*="stop" i]',
+      'button',
+    ]);
+  }
+
   function startCall(id) {
     if (activeId !== null) return;
     setActive(id);
-    // Switch button to "Colgar"
     const btn = document.getElementById('btn-' + id);
     btn.className = 'call-btn end';
     btn.innerHTML = '📵 Colgar';
     btn.onclick = () => endSession();
-    // Tell iframe to start the call
-    const frame = document.getElementById('frame-' + id);
-    if (frame?.contentWindow) frame.contentWindow.postMessage({ type: 'start-call' }, '*');
+    triggerWidgetStart(id);
   }
-
-  window.addEventListener('message', (e) => {
-    const match = agents.find(a => {
-      const f = document.getElementById('frame-' + a.id);
-      return f && f.contentWindow === e.source;
-    });
-    if (!match) return;
-    if (e.data?.type === 'call-started') setActive(match.id);
-    if (e.data?.type === 'call-ended' && activeId === match.id) endSession();
-  });
 
   function setActive(id) {
     activeId = id;
@@ -454,9 +498,7 @@
 
   function endSession() {
     if (activeId) {
-      const activeFrame = document.getElementById('frame-' + activeId);
-      if (activeFrame?.contentWindow) activeFrame.contentWindow.postMessage({ type: 'hang-up' }, '*');
-      // Reset button back to "Llamar"
+      triggerWidgetEnd(activeId);
       resetBtn(activeId);
     }
     activeId = null;
@@ -480,10 +522,20 @@
     const btn = document.querySelector(`#col-${id} .refresh-btn`);
     btn.classList.add('spinning');
     setTimeout(() => btn.classList.remove('spinning'), 500);
-    const frame = document.getElementById('frame-' + id);
+    // Replace widget element to force re-init
+    const old = getWidget(id);
+    if (old) old.remove();
     const agent = agents.find(a => a.id === id);
-    frame.src = '';
-    setTimeout(() => { frame.src = `agent.html?agent_id=${agent.agentId}&t=${Date.now()}`; }, 100);
+    const w = document.createElement('elevenlabs-convai');
+    w.id = 'widget-' + id;
+    w.setAttribute('agent-id', agent.agentId);
+    document.body.appendChild(w);
+    ['elevenlabs-convai:call-started', 'call-started'].forEach(ev =>
+      w.addEventListener(ev, () => { if (activeId === id) setActive(id); })
+    );
+    ['elevenlabs-convai:call-ended', 'call-ended'].forEach(ev =>
+      w.addEventListener(ev, () => { if (activeId === id) endSession(); })
+    );
     resetBtn(id);
   }
 </script>
