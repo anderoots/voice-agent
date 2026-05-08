@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>New IVR Proposal — Arreglatech</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f5f7;
+      --surface: #ffffff;
+      --border: #e4e4e9;
+      --accent: #6b4efa;
+      --text: #1a1a2e;
+      --muted: #8e8ea8;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      text-align: center;
+      padding: 2.5rem 1rem 2rem;
+    }
+    .logo-mark {
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+      font-size: .7rem;
+      font-weight: 600;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1.2rem;
+    }
+    .logo-mark span {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+    header h1 {
+      font-size: clamp(1.75rem, 4vw, 2.8rem);
+      font-weight: 700;
+      letter-spacing: -.03em;
+      color: var(--text);
+      line-height: 1.1;
+      margin-bottom: .5rem;
+    }
+    header h1 em {
+      font-style: normal;
+      font-weight: 400;
+      color: var(--muted);
+    }
+    header p {
+      color: var(--muted);
+      font-size: .9rem;
+      font-weight: 400;
+    }
+
+    main { flex: 1; padding: 1.5rem 1.5rem 4rem; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+
+    .agent-col { display: flex; flex-direction: column; gap: .7rem; }
+
+    .agent-label {
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0 .1rem;
+    }
+
+    .widget-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      transition: box-shadow .3s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.04);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1.25rem 1.5rem;
+      gap: .7rem;
+    }
+
+    .card-avatar {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: var(--avatar-bg, #f0ecff);
+      border: 1.5px solid var(--avatar-border, #ddd6fe);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--avatar-color, #a78bfa);
+      flex-shrink: 0;
+    }
+    .card-avatar svg { width: 40px; height: 40px; }
+
+    .card-name {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -.01em;
+    }
+
+    .card-divider {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+      margin: .2rem 0;
+    }
+
+    .players {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: .6rem;
+    }
+
+    .audio-player {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: .6rem .8rem;
+    }
+    .audio-player.playing {
+      border-color: var(--player-accent, var(--accent));
+      background: var(--player-bg, #f7f4ff);
+    }
+
+    .player-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: .55rem;
+    }
+    .player-label {
+      font-size: .65rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      transition: color .2s;
+    }
+    .audio-player.playing .player-label {
+      color: var(--player-accent, var(--accent));
+    }
+    .player-time {
+      font-size: .65rem;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: .02em;
+    }
+
+    .player-row {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+
+    .play-btn {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: var(--player-accent, var(--accent));
+      border: none;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      color: #fff;
+      transition: opacity .15s ease, transform .15s ease;
+      padding: 0;
+    }
+    .play-btn:hover { opacity: .85; }
+    .play-btn:active { transform: scale(.94); }
+    .play-btn svg { width: 12px; height: 12px; }
+
+    .progress-wrap {
+      flex: 1;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    .progress-track {
+      width: 100%;
+      height: 3px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--player-accent, var(--accent));
+      border-radius: 99px;
+      width: 0%;
+      transition: width .1s linear;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.4rem;
+      color: var(--muted);
+      font-size: .72rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+    }
+    footer .footer-dot {
+      width: 3px; height: 3px;
+      border-radius: 50%;
+      background: var(--border);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark"><span></span> Arreglatech</div>
+  <h1>New IVR <em>Proposal</em></h1>
+  <p>Escucha y compara las versiones de voz de cada agente</p>
+</header>
+
+<main>
+  <div class="grid" id="grid"></div>
+</main>
+
+<footer>
+  Powered by Design Team
+  <span class="footer-dot"></span>
+  Arreglatech
+</footer>
+
+<script>
+  const AVATAR_SVG = `<svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <circle cx="22" cy="16" r="7.5" fill="currentColor" opacity=".9"/>
+    <path d="M6 40c0-8.837 7.163-16 16-16s16 7.163 16 16" fill="currentColor" opacity=".7"/>
+  </svg>`;
+
+  const PLAY_ICON = `<svg viewBox="0 0 12 12" fill="currentColor"><path d="M3 2.5l7 3.5-7 3.5V2.5z"/></svg>`;
+  const PAUSE_ICON = `<svg viewBox="0 0 12 12" fill="currentColor"><rect x="2" y="2" width="3" height="8" rx="1"/><rect x="7" y="2" width="3" height="8" rx="1"/></svg>`;
+
+  const agents = [
+    {
+      id: 'emilia',
+      name: 'Emilia',
+      avatarBg: '#f0fdf4', avatarBorder: '#bbf7d0', avatarColor: '#16a34a',
+      playerAccent: '#16a34a', playerBg: '#f0fdf4',
+      audios: [
+        { label: 'Voz de prueba', src: 'audio/emilia-b.mp3' },
+      ]
+    },
+    {
+      id: 'regina',
+      name: 'Regina',
+      avatarBg: '#f0ecff', avatarBorder: '#ddd6fe', avatarColor: '#9d7ff0',
+      playerAccent: '#9d7ff0', playerBg: '#f7f4ff',
+      audios: [
+        { label: 'Voz de prueba', src: 'audio/regina-b.mp3' },
+      ]
+    },
+  ];
+
+  const allAudios = [];
+  const grid = document.getElementById('grid');
+
+  grid.innerHTML = agents.map(agent => `
+    <div class="agent-col">
+      <div class="agent-label">${agent.name}</div>
+      <div class="widget-card">
+        <div class="card-avatar" style="--avatar-bg:${agent.avatarBg};--avatar-border:${agent.avatarBorder};--avatar-color:${agent.avatarColor}">
+          ${AVATAR_SVG}
+        </div>
+        <div class="card-name">${agent.name}</div>
+        <div class="card-divider"></div>
+        <div class="players">
+          ${agent.audios.map((track, i) => {
+            const audioId = `${agent.id}-${i}`;
+            return `
+              <div class="audio-player" id="player-${audioId}"
+                   style="--player-accent:${agent.playerAccent};--player-bg:${agent.playerBg}">
+                <div class="player-top">
+                  <span class="player-label">${track.label}</span>
+                  <span class="player-time" id="time-${audioId}">0:00</span>
+                </div>
+                <div class="player-row">
+                  <button class="play-btn" id="btn-${audioId}"
+                          style="background:${agent.playerAccent}"
+                          onclick="togglePlay('${audioId}')"
+                          aria-label="Reproducir ${track.label} de ${agent.name}">
+                    ${PLAY_ICON}
+                  </button>
+                  <div class="progress-wrap" onclick="seek(event, '${audioId}')">
+                    <div class="progress-track">
+                      <div class="progress-fill" id="fill-${audioId}"></div>
+                    </div>
+                  </div>
+                </div>
+                <audio id="audio-${audioId}" src="${track.src}" preload="metadata"></audio>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  agents.forEach(agent => {
+    agent.audios.forEach((track, i) => {
+      const audioId = `${agent.id}-${i}`;
+      const audio   = document.getElementById(`audio-${audioId}`);
+      const fill    = document.getElementById(`fill-${audioId}`);
+      const timeEl  = document.getElementById(`time-${audioId}`);
+      const btn     = document.getElementById(`btn-${audioId}`);
+      const player  = document.getElementById(`player-${audioId}`);
+
+      allAudios.push(audio);
+
+      audio.addEventListener('timeupdate', () => {
+        if (!audio.duration) return;
+        fill.style.width = (audio.currentTime / audio.duration * 100) + '%';
+        timeEl.textContent = fmt(audio.currentTime);
+      });
+
+      audio.addEventListener('ended', () => {
+        btn.innerHTML = PLAY_ICON;
+        player.classList.remove('playing');
+        fill.style.width = '0%';
+        timeEl.textContent = '0:00';
+      });
+
+      audio.addEventListener('play', () => {
+        allAudios.forEach(a => {
+          if (a !== audio && !a.paused) {
+            a.pause();
+            const otherId = a.id.replace('audio-', '');
+            document.getElementById(`btn-${otherId}`).innerHTML = PLAY_ICON;
+            document.getElementById(`player-${otherId}`).classList.remove('playing');
+          }
+        });
+        btn.innerHTML = PAUSE_ICON;
+        player.classList.add('playing');
+      });
+
+      audio.addEventListener('pause', () => {
+        btn.innerHTML = PLAY_ICON;
+        player.classList.remove('playing');
+      });
+    });
+  });
+
+  function togglePlay(id) {
+    const audio = document.getElementById(`audio-${id}`);
+    if (audio.paused) { audio.play(); } else { audio.pause(); }
+  }
+
+  function seek(e, id) {
+    const audio = document.getElementById(`audio-${id}`);
+    if (!audio.duration) return;
+    const rect  = e.currentTarget.getBoundingClientRect();
+    audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
+  }
+
+  function fmt(s) {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return `${m}:${sec.toString().padStart(2, '0')}`;
+  }
+</script>
+</body>
+</html>

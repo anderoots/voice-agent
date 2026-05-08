@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UX para Agentes de Voz: Synthflow & ElevenLabs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Plus+Jakarta+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            bg: '#FCFAF7',
+                            card: '#FFFFFF',
+                            accent: '#E67E5F',
+                            secondary: '#5C7A67',
+                            text: '#1F2937',
+                            muted: '#6B7280',
+                            border: '#F3EFEA'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #FCFAF7;
+            color: #1F2937;
+            overflow-x: hidden;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(243, 239, 234, 1);
+        }
+        .custom-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            background: #E5E7EB;
+            border-radius: 2px;
+            outline: none;
+        }
+        .custom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #E67E5F;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="font-sans antialiased">
+
+    <nav class="fixed top-0 w-full z-50 glass-effect border-b border-brand-border">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <span class="text-2xl">🎙️</span>
+                <span class="font-display font-bold text-lg tracking-tight text-brand-text">VUI Intelligence</span>
+            </div>
+            <div class="hidden md:flex space-x-8 text-sm font-semibold text-brand-muted">
+                <button onclick="scrollToSection('hero')" class="hover:text-brand-accent transition-colors">Inicio</button>
+                <button onclick="scrollToSection('metrics')" class="hover:text-brand-accent transition-colors">Métricas</button>
+                <button onclick="scrollToSection('config')" class="hover:text-brand-accent transition-colors">Configuración</button>
+                <button onclick="scrollToSection('prompts')" class="hover:text-brand-accent transition-colors">Guiones</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-24">
+        <!-- Hero -->
+        <section id="hero" class="max-w-5xl mx-auto px-6 py-12 text-center">
+            <div class="inline-block px-4 py-1.5 mb-6 rounded-full bg-brand-accent/10 text-brand-accent text-xs font-bold uppercase tracking-widest">
+                UX Research & Implementation
+            </div>
+            <h1 class="font-display text-4xl md:text-6xl font-bold mb-6 text-brand-text leading-tight">
+                Diseñando Agentes de Voz que <br><span class="text-brand-secondary">Se Sienten Humanos</span>
+            </h1>
+            <p class="text-lg text-brand-muted max-w-2xl mx-auto mb-10 leading-relaxed">
+                Análisis de las mejores prácticas para configurar voces en ElevenLabs y lógicas de conversación en Synthflow. Optimiza la retención reduciendo la fricción cognitiva.
+            </p>
+        </section>
+
+        <!-- Métricas: Impacto de Latencia -->
+        <section id="metrics" class="max-w-7xl mx-auto px-6 py-16">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                <div class="lg:col-span-5">
+                    <h2 class="font-display text-3xl font-bold mb-4">El Factor Crítico: Latencia</h2>
+                    <p class="text-brand-muted mb-6">
+                        En una llamada telefónica, el silencio es el enemigo número uno. Los datos muestran que una respuesta que tarda más de 1.5 segundos rompe la ilusión de fluidez y provoca que el usuario cuelgue o se interrumpa a sí mismo.
+                    </p>
+                    <div class="space-y-4">
+                        <div class="p-4 rounded-xl bg-white border border-brand-border shadow-sm">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-bold text-brand-secondary">Meta de Latencia (TTFB)</span>
+                                <span class="text-xs font-bold bg-green-100 text-green-700 px-2 py-1 rounded">Ideal</span>
+                            </div>
+                            <div class="text-2xl font-bold text-brand-text">600ms - 900ms</div>
+                        </div>
+                        <div class="p-4 rounded-xl bg-white border border-brand-border shadow-sm">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-bold text-brand-accent">Punto de Abandono</span>
+                                <span class="text-xs font-bold bg-red-100 text-red-700 px-2 py-1 rounded">Crítico</span>
+                            </div>
+                            <div class="text-2xl font-bold text-brand-text">&gt; 2.5 Segundos</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:col-span-7 bg-white p-8 rounded-3xl border border-brand-border shadow-sm">
+                    <h4 class="text-center font-bold text-brand-muted mb-6 text-sm uppercase tracking-wider">Impacto de la Latencia en la Retención del Usuario</h4>
+                    <div class="chart-container">
+                        <canvas id="latencyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Configuración ElevenLabs -->
+        <section id="config" class="bg-brand-secondary/5 py-24">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="text-center mb-16">
+                    <h2 class="font-display text-3xl font-bold mb-4">Configuración de Voz (ElevenLabs)</h2>
+                    <p class="text-brand-muted">Ajustar la voz no es solo elegir un tono, es equilibrar estabilidad y expresividad.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-white p-8 rounded-3xl border border-brand-border shadow-lg">
+                        <div class="space-y-10">
+                            <div>
+                                <div class="flex justify-between items-center mb-4">
+                                    <label class="font-bold text-brand-text">Estabilidad (Stability)</label>
+                                    <span id="val-stability" class="text-brand-accent font-bold">50%</span>
+                                </div>
+                                <input type="range" id="input-stability" min="0" max="100" value="50" class="custom-slider">
+                                <div class="flex justify-between text-[10px] mt-2 text-brand-muted font-bold uppercase tracking-tighter">
+                                    <span>Más Expresivo / Inestable</span>
+                                    <span>Más Robótico / Consistente</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between items-center mb-4">
+                                    <label class="font-bold text-brand-text">Similitud (Similarity)</label>
+                                    <span id="val-similarity" class="text-brand-accent font-bold">75%</span>
+                                </div>
+                                <input type="range" id="input-similarity" min="0" max="100" value="75" class="custom-slider">
+                                <div class="flex justify-between text-[10px] mt-2 text-brand-muted font-bold uppercase tracking-tighter">
+                                    <span>Voz Genérica / Limpia</span>
+                                    <span>Voz Original / Artefactos</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="status-card" class="bg-brand-secondary p-8 rounded-3xl text-white flex flex-col justify-between transition-colors duration-500">
+                        <div>
+                            <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                                <span>🧠</span> Diagnóstico UX
+                            </h3>
+                            <p id="status-desc" class="text-white/80 leading-relaxed mb-6">
+                                Tu configuración actual ofrece un balance perfecto para atención al cliente. La voz suena natural y mantiene la atención sin fatigar al oyente.
+                            </p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-white/10 p-4 rounded-xl backdrop-blur-md">
+                                <span class="block text-xs uppercase opacity-60 mb-1">Confianza</span>
+                                <span id="stat-trust" class="text-xl font-bold">Alta</span>
+                            </div>
+                            <div class="bg-white/10 p-4 rounded-xl backdrop-blur-md">
+                                <span class="block text-xs uppercase opacity-60 mb-1">Humanidad</span>
+                                <span id="stat-human" class="text-xl font-bold">Balanceada</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Guiones: Prompting -->
+        <section id="prompts" class="max-w-7xl mx-auto px-6 py-24">
+            <div class="mb-12">
+                <h2 class="font-display text-3xl font-bold mb-4">Arquitectura del Guion (Prompting)</h2>
+                <p class="text-brand-muted">Un agente de voz no lee como un bot de chat. Necesita pausas, confirmaciones y rellenos naturales.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="p-8 rounded-3xl bg-white border border-brand-border shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-brand-accent/10 rounded-2xl flex items-center justify-center text-brand-accent text-2xl mb-6">
+                        💬
+                    </div>
+                    <h4 class="font-bold text-xl mb-4 text-brand-text">Confirmaciones Implícitas</h4>
+                    <p class="text-brand-muted text-sm leading-relaxed mb-4">
+                        En lugar de preguntar siempre "¿Estás de acuerdo?", usa confirmaciones mientras avanzas para que la charla no se detenga.
+                    </p>
+                    <div class="bg-brand-bg p-3 rounded-lg text-xs font-mono text-brand-secondary italic">
+                        "Entendido, agendo la cita para el martes y..."
+                    </div>
+                </div>
+
+                <div class="p-8 rounded-3xl bg-white border border-brand-border shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-brand-secondary/10 rounded-2xl flex items-center justify-center text-brand-secondary text-2xl mb-6">
+                        ⏳
+                    </div>
+                    <h4 class="font-bold text-xl mb-4 text-brand-text">Manejo de Latencia Cognitiva</h4>
+                    <p class="text-brand-muted text-sm leading-relaxed mb-4">
+                        Usa "rellenos" (fillers) al inicio de las respuestas largas para que ElevenLabs empiece a hablar mientras el LLM termina de pensar.
+                    </p>
+                    <div class="bg-brand-bg p-3 rounded-lg text-xs font-mono text-brand-secondary italic">
+                        "Claro, déjame revisar eso por ti un segundo..."
+                    </div>
+                </div>
+
+                <div class="p-8 rounded-3xl bg-white border border-brand-border shadow-sm hover:shadow-md transition-shadow">
+                    <div class="w-12 h-12 bg-orange-100 rounded-2xl flex items-center justify-center text-orange-600 text-2xl mb-6">
+                        📢
+                    </div>
+                    <h4 class="font-bold text-xl mb-4 text-brand-text">Puntuación para Voz</h4>
+                    <p class="text-brand-muted text-sm leading-relaxed mb-4">
+                        Usa puntos suspensivos (...) y puntos (.) para forzar pausas de respiración en el motor de síntesis de voz.
+                    </p>
+                    <div class="bg-brand-bg p-3 rounded-lg text-xs font-mono text-brand-secondary italic">
+                        "Bienvenido... soy tu asistente de hoy."
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Checklist -->
+        <section class="max-w-4xl mx-auto px-6 py-12 mb-24">
+            <div class="bg-brand-text p-10 rounded-[3rem] text-white">
+                <h3 class="font-display text-3xl font-bold mb-8 text-center">Checklist de Lanzamiento UX</h3>
+                <div class="space-y-6">
+                    <div class="flex items-start gap-4">
+                        <div class="w-6 h-6 rounded-full border-2 border-brand-accent flex items-center justify-center text-brand-accent mt-1 flex-shrink-0">✓</div>
+                        <div>
+                            <h5 class="font-bold">¿Barge-in habilitado?</h5>
+                            <p class="text-white/60 text-sm">Permite que el usuario interrumpa al agente en cualquier momento.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="w-6 h-6 rounded-full border-2 border-brand-accent flex items-center justify-center text-brand-accent mt-1 flex-shrink-0">✓</div>
+                        <div>
+                            <h5 class="font-bold">¿Detección de fin de turno (Wait time)?</h5>
+                            <p class="text-white/60 text-sm">Configura en Synthflow entre 600ms y 1200ms según el caso de uso.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4">
+                        <div class="w-6 h-6 rounded-full border-2 border-brand-accent flex items-center justify-center text-brand-accent mt-1 flex-shrink-0">✓</div>
+                        <div>
+                            <h5 class="font-bold">¿Instrucciones de TTS específicas?</h5>
+                            <p class="text-white/60 text-sm">Indica al modelo no usar listas largas ni caracteres especiales como (*).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-brand-border py-12 bg-white text-center">
+        <p class="text-brand-muted text-sm">Desarrollado para optimización de Agentes de IA / Arreglatech</p>
+    </footer>
+
+    <script>
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function initCharts() {
+            const ctx = document.getElementById('latencyChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['200ms', '500ms', '800ms', '1.2s', '1.8s', '2.5s', '3s+'],
+                    datasets: [{
+                        label: 'Retención de Usuario (%)',
+                        data: [98, 96, 92, 75, 40, 15, 5],
+                        borderColor: '#E67E5F',
+                        backgroundColor: 'rgba(230, 126, 95, 0.1)',
+                        borderWidth: 4,
+                        pointRadius: 6,
+                        pointBackgroundColor: '#FFF',
+                        pointBorderColor: '#E67E5F',
+                        pointBorderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#1F2937',
+                            padding: 12,
+                            titleFont: { size: 14, weight: 'bold' },
+                            cornerRadius: 8
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { color: '#6B7280', font: { size: 12 } },
+                            grid: { color: '#F3EFEA' }
+                        },
+                        x: {
+                            ticks: { color: '#6B7280', font: { size: 12 } },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateConfigUI() {
+            const stab = parseInt(document.getElementById('input-stability').value);
+            const sim  = parseInt(document.getElementById('input-similarity').value);
+
+            document.getElementById('val-stability').innerText = stab + '%';
+            document.getElementById('val-similarity').innerText = sim + '%';
+
+            const statusCard = document.getElementById('status-card');
+            const statusDesc = document.getElementById('status-desc');
+            const statTrust  = document.getElementById('stat-trust');
+            const statHuman  = document.getElementById('stat-human');
+
+            if (stab < 30) {
+                statusCard.style.backgroundColor = '#B91C1C';
+                statusDesc.innerText = "La voz es demasiado inestable. Se percibirá como errática, emocionalmente fuera de lugar o con acentos que cambian a mitad de frase. Mala experiencia.";
+                statTrust.innerText = "Baja";
+                statHuman.innerText = "Errática";
+            } else if (stab > 85) {
+                statusCard.style.backgroundColor = '#4B5563';
+                statusDesc.innerText = "Voz extremadamente monótona. Suena como un bot de los años 90. El usuario se dará cuenta de que es una IA y perderá interés rápidamente.";
+                statTrust.innerText = "Media";
+                statHuman.innerText = "Robótica";
+            } else if (sim > 90) {
+                statusCard.style.backgroundColor = '#E67E5F';
+                statusDesc.innerText = "Mucha similitud puede introducir ruidos o 'rasgueos' digitales. Es mejor bajarla un poco para limpiar la señal de audio.";
+                statTrust.innerText = "Alta";
+                statHuman.innerText = "Artefactos";
+            } else {
+                statusCard.style.backgroundColor = '#5C7A67';
+                statusDesc.innerText = "Configuración óptima. La voz tiene micro-expresiones humanas sin perder el control del tono. Ideal para una conversación larga.";
+                statTrust.innerText = "Máxima";
+                statHuman.innerText = "Orgánica";
+            }
+        }
+
+        window.addEventListener('load', () => {
+            initCharts();
+            document.getElementById('input-stability').addEventListener('input', updateConfigUI);
+            document.getElementById('input-similarity').addEventListener('input', updateConfigUI);
+        });
+    </script>
+</body>
+</html>
