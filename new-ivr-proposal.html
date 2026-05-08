@@ -72,12 +72,12 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 1.25rem;
-      max-width: 1040px;
+      max-width: 700px;
       margin: 0 auto;
     }
-    @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+    @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
 
     /* ── Agent column ── */
     .agent-col { display: flex; flex-direction: column; gap: .7rem; }
@@ -223,41 +223,6 @@
       transition: width .1s linear;
     }
 
-    /* Pending placeholder */
-    .player-pending {
-      width: 100%;
-      background: var(--bg);
-      border: 1px dashed var(--border);
-      border-radius: 10px;
-      padding: .6rem .8rem;
-      display: flex;
-      align-items: center;
-      gap: .55rem;
-    }
-    .pending-dot {
-      width: 30px; height: 30px;
-      border-radius: 50%;
-      background: var(--border);
-      flex-shrink: 0;
-    }
-    .pending-info { flex: 1; }
-    .pending-label {
-      font-size: .65rem;
-      font-weight: 600;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      opacity: .5;
-      display: block;
-      margin-bottom: .3rem;
-    }
-    .pending-bar {
-      height: 3px;
-      border-radius: 99px;
-      background: var(--border);
-      opacity: .5;
-    }
-
     /* ── Footer ── */
     footer {
       text-align: center;
@@ -313,23 +278,12 @@
 
   const agents = [
     {
-      id: 'tripti',
-      name: 'Tripti',
-      avatarBg: '#fdf2f8', avatarBorder: '#fbcfe8', avatarColor: '#d4609a',
-      playerAccent: '#d4609a', playerBg: '#fff5fa',
-      audios: [
-        { label: 'Versión A', src: 'audio/tripti-a.mp3' },
-        { label: 'Versión B', src: 'audio/tripti-b.mp3' },
-      ]
-    },
-    {
       id: 'emilia',
       name: 'Emilia',
       avatarBg: '#f0fdf4', avatarBorder: '#bbf7d0', avatarColor: '#16a34a',
       playerAccent: '#16a34a', playerBg: '#f0fdf4',
       audios: [
-        { label: 'Versión A', src: 'audio/emilia-a.mp3' },
-        { label: 'Versión B', src: 'audio/emilia-b.mp3' },
+        { label: 'Voz de prueba', src: 'audio/emilia-a.mp3' },
       ]
     },
     {
@@ -338,13 +292,11 @@
       avatarBg: '#f0ecff', avatarBorder: '#ddd6fe', avatarColor: '#9d7ff0',
       playerAccent: '#9d7ff0', playerBg: '#f7f4ff',
       audios: [
-        { label: 'Versión A', src: 'audio/regina-a.mp3' },
-        { label: 'Versión B', src: 'audio/regina-b.mp3' },
+        { label: 'Voz de prueba', src: 'audio/regina-a.mp3' },
       ]
     },
   ];
 
-  // All audio elements — for single-playback enforcement
   const allAudios = [];
 
   const grid = document.getElementById('grid');
@@ -361,16 +313,6 @@
         <div class="players">
           ${agent.audios.map((track, i) => {
             const audioId = `${agent.id}-${i}`;
-            if (!track.src) {
-              return `
-                <div class="player-pending">
-                  <div class="pending-dot"></div>
-                  <div class="pending-info">
-                    <span class="pending-label">${track.label}</span>
-                    <div class="pending-bar"></div>
-                  </div>
-                </div>`;
-            }
             return `
               <div class="audio-player" id="player-${audioId}"
                    style="--player-accent:${agent.playerAccent};--player-bg:${agent.playerBg}">
@@ -399,10 +341,8 @@
     </div>
   `).join('');
 
-  // Wire up audio events after DOM is built
   agents.forEach(agent => {
     agent.audios.forEach((track, i) => {
-      if (!track.src) return;
       const audioId = `${agent.id}-${i}`;
       const audio   = document.getElementById(`audio-${audioId}`);
       const fill    = document.getElementById(`fill-${audioId}`);
@@ -426,7 +366,6 @@
       });
 
       audio.addEventListener('play', () => {
-        // Pause all other audios
         allAudios.forEach(a => {
           if (a !== audio && !a.paused) {
             a.pause();
