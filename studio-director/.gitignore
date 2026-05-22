@@ -1,0 +1,23 @@
+# Assets generados (no versionar archivos pesados)
+assets/audio/*/
+assets/video/*/
+assets/output/*/
+
+# Mantener estructura de directorios
+!assets/audio/.gitkeep
+!assets/video/.gitkeep
+!assets/output/.gitkeep
+!projects/.gitkeep
+
+# Entorno
+.env
+.env.local
+*.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Scripts de ensamblaje generados (son temporales por proyecto)
+assemble_*.sh
+concat_*.txt

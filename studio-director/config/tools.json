@@ -1,0 +1,100 @@
+{
+  "elevenlabs": {
+    "api_key_env": "ELEVENLABS_API_KEY",
+    "voice_id_env": "VOICE_ID",
+    "base_url": "https://api.elevenlabs.io/v1",
+    "models": {
+      "draft": "eleven_turbo_v2",
+      "final": "eleven_multilingual_v2"
+    },
+    "default_voice_settings": {
+      "stability": 0.5,
+      "similarity_boost": 0.75,
+      "style": 0.0,
+      "use_speaker_boost": true
+    },
+    "output_format": "mp3_44100_128"
+  },
+  "higgsfield": {
+    "api_key_env": "HIGGSFIELD_API_KEY",
+    "base_url": "https://api.higgsfield.ai/v1",
+    "defaults": {
+      "duration": 4,
+      "max_retries": 3,
+      "retry_delay_seconds": 10
+    }
+  },
+  "airtable": {
+    "token_env": "AIRTABLE_TOKEN",
+    "base_id_env": "AIRTABLE_BASE_ID",
+    "base_url": "https://api.airtable.com/v0",
+    "tables": {
+      "projects": "Proyectos",
+      "scenes": "Escenas"
+    }
+  },
+  "ffmpeg": {
+    "export_presets": {
+      "instagram_reel": {
+        "platform": "Instagram Reels",
+        "ratio": "9:16",
+        "resolution": "1080x1920",
+        "fps": 30,
+        "crf": 23,
+        "preset": "medium",
+        "filter": "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:black,setsar=1,fps=30",
+        "audio_bitrate": "192k"
+      },
+      "tiktok": {
+        "platform": "TikTok",
+        "ratio": "9:16",
+        "resolution": "1080x1920",
+        "fps": 30,
+        "crf": 23,
+        "preset": "medium",
+        "filter": "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:black,setsar=1,fps=30",
+        "audio_bitrate": "192k"
+      },
+      "youtube_shorts": {
+        "platform": "YouTube Shorts",
+        "ratio": "9:16",
+        "resolution": "1080x1920",
+        "fps": 30,
+        "crf": 20,
+        "preset": "medium",
+        "filter": "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:black,setsar=1,fps=30",
+        "audio_bitrate": "192k"
+      },
+      "youtube": {
+        "platform": "YouTube",
+        "ratio": "16:9",
+        "resolution": "1920x1080",
+        "fps": 24,
+        "crf": 18,
+        "preset": "slow",
+        "filter": "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:black,setsar=1,fps=24",
+        "audio_bitrate": "192k"
+      },
+      "linkedin": {
+        "platform": "LinkedIn",
+        "ratio": "16:9",
+        "resolution": "1920x1080",
+        "fps": 30,
+        "crf": 20,
+        "preset": "medium",
+        "filter": "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:black,setsar=1,fps=30",
+        "audio_bitrate": "192k"
+      },
+      "presentation": {
+        "platform": "Presentación",
+        "ratio": "16:9",
+        "resolution": "1920x1080",
+        "fps": 24,
+        "crf": 18,
+        "preset": "slow",
+        "filter": "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2:black,setsar=1,fps=24",
+        "audio_bitrate": "192k"
+      }
+    }
+  }
+}

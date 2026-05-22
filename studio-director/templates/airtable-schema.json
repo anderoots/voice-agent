@@ -1,0 +1,57 @@
+{
+  "_comment": "Diseño de base Airtable para Studio Director. Importar manualmente en airtable.com/create.",
+  "base_name": "Studio Director",
+  "tables": [
+    {
+      "name": "Proyectos",
+      "description": "Registro de todos los proyectos de producción audiovisual",
+      "fields": [
+        {"name": "Name", "type": "singleLineText", "primary": true, "description": "Nombre del proyecto. Formato: YYYYMMDD_tipo_plataforma"},
+        {"name": "Status", "type": "singleSelect", "options": ["Brief", "En producción", "Audio OK", "Video OK", "Montaje", "Revisión", "Entregado"]},
+        {"name": "Platform", "type": "singleSelect", "options": ["Instagram Reels", "TikTok", "YouTube", "YouTube Shorts", "LinkedIn", "Presentación", "Otro"]},
+        {"name": "Type", "type": "singleSelect", "options": ["Intro", "Reel", "Explainer", "Documental", "Branded Content", "Cortometraje", "Otro"]},
+        {"name": "Duration_target", "type": "number", "description": "Duración objetivo en segundos"},
+        {"name": "Style", "type": "singleLineText"},
+        {"name": "Aspect_ratio", "type": "singleSelect", "options": ["9:16", "16:9", "1:1"]},
+        {"name": "Scenes_total", "type": "number"},
+        {"name": "Script", "type": "longText"},
+        {"name": "Final_output", "type": "url"},
+        {"name": "Created_at", "type": "dateTime"},
+        {"name": "Notes", "type": "longText"},
+        {"name": "Scenes", "type": "linkedRecord", "linkedTable": "Escenas"}
+      ]
+    },
+    {
+      "name": "Escenas",
+      "description": "Desglose de escenas y shots por proyecto",
+      "fields": [
+        {"name": "Scene_number", "type": "number", "primary": true},
+        {"name": "Project", "type": "linkedRecord", "linkedTable": "Proyectos"},
+        {"name": "Shot_size", "type": "singleSelect", "options": ["ECU", "CU", "MCU", "MS", "MLS", "LS", "WS", "EWS"]},
+        {"name": "Camera_movement", "type": "singleSelect", "options": ["Estático", "Pan", "Tilt", "Dolly In", "Dolly Out", "Zoom", "Crane", "Handheld", "Steadicam", "Dutch Angle", "Tracking", "Arc Shot"]},
+        {"name": "Duration_s", "type": "number"},
+        {"name": "Description", "type": "longText"},
+        {"name": "Narration", "type": "longText"},
+        {"name": "Status", "type": "singleSelect", "options": ["Pendiente", "Audio OK", "Video OK", "Compuesto", "Aprobado"]},
+        {"name": "Audio_file", "type": "singleLineText"},
+        {"name": "Video_file", "type": "singleLineText"},
+        {"name": "Higgsfield_prompt", "type": "longText"},
+        {"name": "Elevenlabs_voice_id", "type": "singleLineText"}
+      ]
+    },
+    {
+      "name": "Assets",
+      "description": "Librería de assets reutilizables entre proyectos",
+      "fields": [
+        {"name": "Name", "type": "singleLineText", "primary": true},
+        {"name": "Type", "type": "singleSelect", "options": ["Audio", "Video clip", "Música", "SFX", "Motion graphic", "Logo"]},
+        {"name": "File_path", "type": "singleLineText"},
+        {"name": "Tags", "type": "multipleSelect", "options": ["B-roll", "Intro", "Outro", "Transición", "Hero shot", "Establishing shot"]},
+        {"name": "Style", "type": "singleLineText"},
+        {"name": "Platform_fit", "type": "multipleSelect", "options": ["Instagram Reels", "TikTok", "YouTube", "YouTube Shorts", "LinkedIn"]},
+        {"name": "Duration_s", "type": "number"},
+        {"name": "Used_in", "type": "linkedRecord", "linkedTable": "Proyectos"}
+      ]
+    }
+  ]
+}
